@@ -73,8 +73,8 @@ RUN mkdir -p /tmp/ants/build \
       -DCMAKE_INSTALL_PREFIX=/opt/ants \
       /tmp/ants/source 
 
-RUN cmake --build . -j 4
-RUN cd /tmp/ants/ANTS-build && cmake --install . -j 4
+RUN cd /tmp/ants/build && cmake --build . -j 4
+RUN cd /tmp/ants/build && cmake --install .
 ENV ANTSPATH="/opt/ants/bin" \
     PATH="/opt/ants/bin:$PATH" \
     LD_LIBRARY_PATH="/opt/ants/lib:$LD_LIBRARY_PATH"
@@ -174,8 +174,4 @@ WORKDIR /data
 
 
 CMD ["/bin/bash"]
-
-
-
-
 
