@@ -1,0 +1,178 @@
+{% extends 'template.html' %}
+
+{% block title %}
+    ENIGMA CHR Diffusion project: {{ study.site }}
+{% endblock title %}
+
+{% block subtitle %}
+    <h2><p>Study level summary</p></h2>
+{% endblock subtitle %}
+
+{% block linkline %}
+    <p>Project directory: <code>{{ study.root_dir }}</code></p>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+<!-- Example row of columns -->
+<div class="row">
+  <div class="col-md-12">
+    <h2>Project summary</h2>
+    <table class="table">
+        <tr>
+            <th scope="col">Number of subjects</td>
+            <th scope="col">Dicom</td>
+            <th scope="col">Raw b-vector</td>
+            <th scope="col">Raw b-value</td>
+            <th scope="col">Raw Nifti</td>
+            <th scope="col">Unring</td>
+            <th scope="col">Masking</td>
+            <th scope="col">Eddy</td>
+            <th scope="col">Eddy corrected bvec</td>
+            <th scope="col">DTIFIT</td>
+            <th scope="col">TBSS started</td>
+            <th scope="col">TBSS completed</td>
+        </tr>
+        <tr>
+            <td scope="col">{{ study.number_of_subjects }}</td>
+
+            {% if study.pass_dicom < study.number_of_subjects %}
+                <td style ="background-color: red" scope="col"><p style="color:white">{{ study.pass_dicom }}</p></td>
+            {% else %}
+                <td scope="col">{{ study.pass_dicom }}</td>
+            {% endif %}
+
+            {% if study.pass_bvec < study.number_of_subjects %}
+                <td style ="background-color: red" scope="col"><p style="color:white">{{ study.pass_bvec }}</p></td>
+            {% else %}
+                <td scope="col">{{ study.pass_bvec }}</td>
+            {% endif %}
+
+            {% if study.pass_bval < study.number_of_subjects %}
+                <td style ="background-color: red" scope="col"><p style="color:white">{{ study.pass_bval }}</p></td>
+            {% else %}
+                <td scope="col">{{ study.pass_bval }}</td>
+            {% endif %}
+
+            {% if study.pass_dwi < study.number_of_subjects %}
+                <td style ="background-color: red" scope="col"><p style="color:white">{{ study.pass_dwi }}</p></td>
+            {% else %}
+                <td scope="col">{{ study.pass_dwi }}</td>
+            {% endif %}
+
+            {% if study.pass_unring < study.number_of_subjects %}
+                <td style ="background-color: red" scope="col"><p style="color:white">{{ study.pass_unring }}</p></td>
+            {% else %}
+                <td scope="col">{{ study.pass_unring }}</td>
+            {% endif %}
+
+            {% if study.pass_mask < study.number_of_subjects %}
+                <td style ="background-color: red" scope="col"><p style="color:white">{{ study.pass_mask }}</p></td>
+            {% else %}
+                <td scope="col">{{ study.pass_mask }}</td>
+            {% endif %}
+
+            {% if study.pass_eddy < study.number_of_subjects %}
+                <td style ="background-color: red" scope="col"><p style="color:white">{{ study.pass_eddy }}</p></td>
+            {% else %}
+                <td scope="col">{{ study.pass_eddy }}</td>
+            {% endif %}
+
+            {% if study.pass_eddy_bvec < study.number_of_subjects %}
+                <td style ="background-color: red" scope="col"><p style="color:white">{{ study.pass_eddy_bvec }}</p></td>
+            {% else %}
+                <td scope="col">{{ study.pass_eddy_bvec }}</td>
+            {% endif %}
+
+            {% if study.pass_dtifit < study.number_of_subjects %}
+                <td style ="background-color: red" scope="col"><p style="color:white">{{ study.pass_dtifit }}</p></td>
+            {% else %}
+                <td scope="col">{{ study.pass_dtifit }}</td>
+            {% endif %}
+
+            {% if study.started_tbss %}
+                <td scope="col">{{ study.started_tbss }}</td>
+            {% else %}
+                <td style ="background-color: red" scope="col"><p style="color:white">{{ study.started_tbss }}</p></td>
+            {% endif %}
+
+            {% if study.completed_tbss %}
+                <td scope="col">{{ study.completed_tbss }}</td>
+            {% else %}
+                <td style ="background-color: red" scope="col"><p style="color:white">{{ study.completed_tbss }}</p></td>
+            {% endif %}
+        </tr>
+    </table>
+    <br><br><br>
+
+
+    <h2>Dicom header deviation check</h2>
+    {{ study.dicom_df_html }}
+    <br><br><br>
+
+    <h2>Diffusion data deviation check</h2>
+    {{ study.nifti_df_html }}
+    <br><br><br>
+
+    <h2>Head motion summary</h2>
+    {{ study.head_motion_df_html }}
+    <br><br><br>
+
+    {% if study.tree_out %}
+    <h2>Data Structure</h2>
+    {% for directory_title, tree_s in study.tree_out.items() %}
+    <h3>{{ directory_title }}</h3>
+    <pre class="prettyprint">
+    <div><code>{{ tree_s }}</code></div>
+    </pre>
+    {% endfor %}
+    <br><br><br>
+    {% endif %}
+
+    <h2>TBSS output</h2>
+    {{ study.tbss_df_html }}
+    <br><br><br>
+
+    <h2>TBSS QC</h2>
+    {{ study.tbss_qc_df_html }}
+    <br><br><br>
+
+
+    <h2>Snapshot of the average FA image</h2>
+    <p class="font-weight-bold">Registered to ENIGMA template</p> 
+    <img style="height:800px;width:auto;" src="{{ study.tbss_screen_shot_dir }}/mean FA.jpg" alt="image here"> </img>
+    <br><br><br>
+
+    <h2>Snapshot of the ENIGMA template FA image</h2>
+    <p class="font-weight-bold">Registered to ENIGMA template</p> 
+    <img style="height:800px;width:auto;" src="{{ study.tbss_screen_shot_dir }}/ENIGMA Template FA.jpg" alt="image here"> </img>
+    <br><br><br>
+
+    <h2>Snapshot of the ENIGMA template FA skeleton</h2>
+    <p class="font-weight-bold">Registered to ENIGMA template</p> 
+    <img style="height:800px;width:auto;" src="{{ study.tbss_screen_shot_dir }}/ENIGMA Template FA skeleton.jpg" alt="image here"> </img>
+    <br><br><br>
+
+    <h2>Snapshot of the mean all-FA-skeleton</h2>
+    <p class="font-weight-bold">Registered to ENIGMA template</p> 
+    <img style="height:800px;width:auto;" src="{{ study.tbss_screen_shot_dir }}/Mean FA skeleton.jpg" alt="image here"> </img>
+    <br><br><br>
+
+
+
+    <h2>Subject summary</h2>
+    <table class="table">
+    <tr>
+        <th scope="col">Subject ID</td>
+    </tr>
+    {% for subject in study.subject_classes %}
+        <tr>
+            <td scope="col"><a href={{ subject.web_summary_file }}>{{ subject.subject_name }}</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+    <br><br><br>
+
+  </div>
+</div>
+{% endblock content %}
