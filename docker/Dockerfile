@@ -151,6 +151,7 @@ RUN pip install nifti-snapshot
 
 # ENIGMA CHR pipeline
 RUN git clone https://github.com/kcho/ENIGMA_CHR_DTI /opt/ENIGMA_CHR_DTI
+ENV PYTHONPATH="/opt/ENIGMA_CHR_DTI:${PYTHONPATH}"
 
 
 # dcm2niix
@@ -165,7 +166,8 @@ RUN /opt/dcm2niix/dcm2niix -h
 
 # unring
 RUN apt-get update \
-    && apt-get install -y libfftw3-dev
+    && apt-get install -y libfftw3-dev wkhtmltopdf xvfb tree
+
 RUN git clone https://bitbucket.org/reisert/unring.git /opt/unring
 ENV PATH="/opt/unring/fsl:$PATH"
 
@@ -177,5 +179,5 @@ WORKDIR /data
 
 RUN apt-get install -y x11-apps
 
-CMD ["/bin/bash"]
-
+#CMD ["/bin/bash"]
+CMD ["xvfb-run python /opt/ENIGMA_CHR_DTI/script/enigma_chr_pipeline.py"]

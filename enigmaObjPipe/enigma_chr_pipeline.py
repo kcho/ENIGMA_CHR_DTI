@@ -184,6 +184,7 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
 
             subject.study_summary_file = self.web_summary_file
 
+        self.tbss_all = subject.tbss_all
 
     def project_pipeline(self, force: bool = False):
         '''Study wise pipeline'''
