@@ -59,6 +59,7 @@ class EddyPipe(object):
     def eddy_squeeze(self, force: bool = False):
         '''Eddy QC', force: bool = False'''
         print(self.eddy_squeeze_dir)
+        print('hahah')
         sys.path.append(self.eddy_squeeze_dir + '/eddy_squeeze')
         import eddy_plots
         import eddy_web
@@ -70,6 +71,8 @@ class EddyPipe(object):
                 out_dir)
 
         self.eddyQc.summary_df()
+        self.image_list = []
+        print('hohohohoh')
         self.eddyQc.save_all_outlier_slices()
 
         self.eddyQc.df_motion.to_csv(out_dir / 'motion.csv')

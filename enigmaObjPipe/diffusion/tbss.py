@@ -20,6 +20,7 @@ class StudyTBSS(object):
         self.tbss_all_input_csv = self.tbss_all_out_dir / 'imagelist.csv'
         with open(self.tbss_all_input_csv, 'w') as f:
             for subject in self.subject_classes:
+                print(subject)
                 line_to_write = ','.join(
                     [str(getattr(subject, x)) for x in self.tbss_all_modalities])
                 f.write(line_to_write+'\n')
@@ -32,18 +33,22 @@ class StudyTBSS(object):
                 f.write(subject.subject_name+'\n')
         # self.logger.info('TBSS input caselist is written')
 
-    def execute_tbss(self):
+    def execute_tbss(self, force: bool = False):
         command = f'{self.tbss_all} \
                 --modality {",".join(self.tbss_all_modalities_str)} \
                 --input {self.tbss_all_input_csv} \
                 --caselist {self.tbss_all_caselist_csv} \
                 --outDir {self.tbss_all_out_dir} \
-                --studyTemplate \
+                --enigma \
                 --space {os.environ["FSLDIR"]}/data/standard/FMRIB58_FA_1mm.nii.gz \
                 -n -1'
 
-        print(command)
-        # self.run(command)
+        self.completed_tbss = (self.tbss_stats_dir / 'FA_combined_roi.csv'
+                ).is_file()
+
+        if force or not self.completed_tbss:
+            print(command)
+            self.run(command)
 
     def clean_up_df(self, df_loc, group_order=False):
         '''Clean up the dataframe'''
@@ -160,5 +165,68 @@ class StudyTBSS(object):
 
     def run_tbss(self, force: bool = False):
         # self.get_tbss_diff_modalities()
-        self.create_tbss_all_csv('tbss')
+        self.create_tbss_all_csv(self.tbss_all_out_dir)
         self.execute_tbss()
+
+
+    def tbss_summary(self):
+        self.tbss_df = pd.DataFrame()
+        for modality in self.tbss_all_modalities_str:
+            df_tmp = pd.read_csv(
+                    self.tbss_stats_dir / f'{modality}_combined_roi.csv')
+            rename_col = lambda x: 'Average' if x == f'Average{modality}' \
+                    else x
+            df_tmp.columns = [rename_col(x) for x in df_tmp.columns]
+            df_tmp['Modality'] = modality
+            df_tmp = df_tmp[['Modality', 'Cases', 'Average'] + [x for x in
+                df_tmp.columns if x not in ['Modality', 'Cases', 'Average']]]
+            self.tbss_df = pd.concat([self.tbss_df, df_tmp])
+
+        self.tbss_df_html = self.tbss_df.to_html(
+                classes=["table-bordered", "table-striped", "table-hover"]
+            )
+
+    def tbss_qc(self, force):
+
+        # tbss table QC
+        self.tbss_qc_df = self.tbss_df.groupby('Modality').describe()[
+                'Average']
+        self.tbss_qc_df_html = self.tbss_qc_df.to_html(
+                classes=["table-bordered", "table-striped", "table-hover"]
+            )
+
+        # tbss visualization
+        self.tbss_mean_FA = self.tbss_stats_dir / 'mean_FA.nii.gz'
+        self.tbss_template_FA = self.tbss_stats_dir / 'ENIGMA_DTI_FA.nii.gz'
+        self.tbss_template_FA_skeleton = self.tbss_stats_dir / \
+                'ENIGMA_DTI_FA_skeleton.nii.gz'
+        self.snapshot_tbss(self.tbss_mean_FA, 'mean FA', force)
+        self.snapshot_tbss(self.tbss_template_FA, 'ENIGMA Template FA', force)
+
+        # template skeleton with template FA
+        self.snapshot_tbss_gb(self.tbss_template_FA_skeleton,
+                              self.tbss_template_FA,
+                              'ENIGMA Template FA skeleton', force=force)
+
+        # template skeleton with template FA
+        import nibabel as nb
+        import numpy as np
+
+        self.tbss_all_FA_skel = self.tbss_stats_dir / \
+                'all_FA_skeletonized.nii.gz'
+
+        self.tbss_all_FA_skel_mean = self.tbss_stats_dir / \
+                'all_FA_skeletonized_mean.nii.gz'
+
+        img = nb.load(self.tbss_all_FA_skel)
+        data = np.mean(img.get_fdata(), axis=3)
+        nb.Nifti1Image(data, img.affine).to_filename(
+                self.tbss_all_FA_skel_mean)
+
+        self.snapshot_tbss_gb(self.tbss_all_FA_skel_mean,
+                              self.tbss_template_FA,
+                              'Mean FA skeleton',
+                              cmap='Blues_r',
+                              force=force)
+
+

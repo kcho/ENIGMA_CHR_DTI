@@ -144,7 +144,10 @@ ENV FSLDIR="/opt/fsl-6.0.4" \
 RUN /bin/bash /opt/tbss/install.sh setup
 
 # eddy-squeeze
-RUN git clone https://github.com/pnlbwh/eddy-squeeze /opt/eddy-squeeze
+#RUN git clone https://github.com/pnlbwh/eddy-squeeze /opt/eddy-squeeze
+RUN pip install eddy-squeeze
+RUN pip install nifti-snapshot
+
 
 # ENIGMA CHR pipeline
 RUN git clone https://github.com/kcho/ENIGMA_CHR_DTI /opt/ENIGMA_CHR_DTI
@@ -172,6 +175,7 @@ RUN dipy_gibbs_ringing -h
 
 WORKDIR /data
 
+RUN apt-get install -y x11-apps
 
 CMD ["/bin/bash"]
 

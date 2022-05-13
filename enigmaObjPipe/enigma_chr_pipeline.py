@@ -1,23 +1,28 @@
 from pathlib import Path
 import sys
+import os
+import pandas as pd
 
 sys.path.append('/Users/kc244/ENIGMA_CHR_DTI')
 from enigmaObjPipe.utils.paths import read_objPipe_config
-from enigmaObjPipe.utils.dicom import DicomTools
+from enigmaObjPipe.utils.dicom import DicomTools, DicomToolsStudy
 from enigmaObjPipe.utils.run import RunCommand
-from enigmaObjPipe.diffusion.dwi import DwiPipe
+from enigmaObjPipe.utils.snapshots import Snapshot
+from enigmaObjPipe.utils.web_summary import create_subject_summary, create_project_summary
+from enigmaObjPipe.diffusion.dwi import DwiPipe, DwiToolsStudy
 from enigmaObjPipe.diffusion.eddy import EddyPipe
 from enigmaObjPipe.diffusion.tbss import StudyTBSS
 from enigmaObjPipe.denoising.gibbs import NoiseRemovalPipe
 
 
 class EnigmaChrSubjectDicomDir(
-        DicomTools, RunCommand, DwiPipe, NoiseRemovalPipe, EddyPipe):
+        DicomTools, RunCommand, DwiPipe, NoiseRemovalPipe, EddyPipe,
+        Snapshot):
     def __init__(self, dicom_dir):
         self.dicom_dir = Path(dicom_dir)
         self.subject_name = dicom_dir.name
         self.study_dir = self.dicom_dir.parent.parent
-        self.nifti_dir = self.study_dir / 'rawdata/dwi' / self.subject_name
+        self.nifti_dir = self.study_dir / 'rawdata' / self.subject_name
         self.derivatives_root = self.study_dir / 'derivatives'
         self.deriv_dwi_root = self.derivatives_root / 'dwi_preproc'
         self.diff_dir = self.deriv_dwi_root / self.subject_name
@@ -33,10 +38,31 @@ class EnigmaChrSubjectDicomDir(
         self.diff_mask = self.diff_dir / f'{self.subject_name}_dwi_mask.nii.gz'
         self.eddy_out_dir = self.diff_dir
         self.diff_ep = self.diff_dir / f'{self.subject_name}_eddy_out'
+        self.diff_ep_out = self.diff_dir / \
+                f'{self.subject_name}_eddy_out.nii.gz'
+        self.diff_ep_bvec = self.diff_dir / \
+                f'{self.subject_name}_eddy_out.eddy_rotated_bvecs'
+
         self.repol_on = True
 
+        # diffusion scalar maps from dtifit
+        for i in ['FA', 'L1', 'L2', 'L3', 'MD',
+                  'MO', 'S0', 'V1', 'V2', 'V3', 'RD']:
+            setattr(self, f'dti_{i}', self.diff_dir / f'dti_{i}.nii.gz')
+
         # eddy qc output directory
-        self.eddy_qc_dir = self.derivatives_root / 'eddy_qc' / self.subject_name
+        self.eddy_qc_dir = self.derivatives_root / \
+                'eddy_qc' / self.subject_name
+
+        # snapshots
+        self.screen_shot_dir = self.derivatives_root / \
+                'screenshots' / self.subject_name
+
+        # web output
+        self.web_summary_dir = self.derivatives_root / \
+                'web_summary' / self.subject_name
+        self.web_summary_file = self.web_summary_dir / \
+                f'{self.subject_name}.html'
 
 
     def subject_pipeline(self, force: bool = False):
@@ -49,39 +75,66 @@ class EnigmaChrSubjectDicomDir(
 
         # 3. check if the conversion worked correctly
         self.check_diff_nifti_info(force)
+        self.snapshot_first_b0(self.diff_raw_dwi, 'Raw DWI', force)
+                      
 
         # 4. Diffusion preprocessing
         # 4a. gibbs unring
         self.run_gibbs_unring(self.diff_raw_dwi, self.diff_dwi_unring, force)
+        self.snapshot_first_b0(self.diff_dwi_unring, 'Unring DWI', force)
+        self.snapshot_diff_first_b0(self.diff_dwi_unring, self.diff_raw_dwi,
+                                    'Unring DWI', 'Raw DWI', force)
+
 
         # 4b. topup if site have reverse encoding maps
         # self.topup_preparation_ampscz(force)
 
         # 4c. run Eddy
         self.eddy(force)
+        self.snapshot_first_b0(self.diff_mask, 'mask', force)
+        self.snapshot_first_b0(self.diff_ep.with_suffix('.nii.gz'),
+                               'Eddy DWI', force)
+        self.snapshot_diff_first_b0(self.diff_ep.with_suffix('.nii.gz'),
+                                    self.diff_dwi_unring,
+                                    'Eddy output', 'Unring DWI', force)
 
         # 5. Eddy QC
         self.eddy_squeeze(force)
+        self.eddyRun.df_motion.index = [self.subject_name]
 
         # 6. Tensor fit & decomp
         self.fsl_tensor_fit(force)
 
         # 7. Capture maps
-        self.fa_screen_shot_dir = self.derivatives_root / 'FA_screenshots' / \
-                self.subject_name
-        self.screen_shots(force)
+        self.snapshot_first_b0(self.dti_FA, 'FA', force)
+        self.snapshot_first_b0(self.dti_MD, 'MD', force)
+        self.snapshot_first_b0(self.dti_RD, 'RD', force)
+        self.snapshot_first_b0(self.dti_L1, 'AD', force)
+
+        self.tree_out = {}
+        for title, dir_path in {'Raw Nifti': self.nifti_dir,
+                                'Diffusion preproc': self.diff_dir,
+                                'Eddy-squeeze': self.eddy_qc_dir,
+                                'Nifti snapshots': self.screen_shot_dir,
+                                'Web summary': self.web_summary_dir}.items():
+            tree_out_text = os.popen(f'tree {dir_path}').read()
+            self.tree_out[title] = tree_out_text
+
+        # # 8. HTML summary
+        create_subject_summary(self, self.web_summary_file)
 
 
 
-class EnigmaChrStudy(StudyTBSS, RunCommand):
-    def __init__(self, root_dir: Path):
+class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
+        DicomToolsStudy, DwiToolsStudy):
+    def __init__(self, root_dir: Path, site: str = None):
         '''ENIGMA CHR Project directory object
 
         Key argument:
             root_dir: Root of the ENIGMA CHR data directory
 
         Expected data structure:
-            /home/kevin/enigma_root_dir
+            /home/kevin/enigma_root_dir  <- `root_dir`
             └── source
                 ├── subject_01
                 │   ├── dicom_00001.dcm
@@ -98,41 +151,60 @@ class EnigmaChrStudy(StudyTBSS, RunCommand):
             >> enigmaChrStudy = EnigmaChrStudy(root_dir)
             >> enigmaChrStudy.enigma_chr_diffusion_preproc_pipeline()
         '''
+        if site is not None:
+            self.site = site
+        else:
+            self.site = 'Study'
+
         self.root_dir = Path(root_dir)
         self.source_dir = self.root_dir / 'sourcedata'
-        self.subjects = list(sorted(self.source_dir.glob('*')))
-        self.subject_classes = [EnigmaChrSubjectDicomDir(x) for x in self.subjects]
+        self.subjects = list(sorted([x for x in self.source_dir.glob('*')
+            if not x.name.startswith('.')]))
+        self.subject_classes = [EnigmaChrSubjectDicomDir(x) for x
+                                in self.subjects]
+
+        # tbss
+        self.derivatives_root = self.root_dir / 'derivatives'
+        self.tbss_all_out_dir = self.derivatives_root / 'tbss'
+        self.tbss_stats_dir = self.tbss_all_out_dir / 'stats'
+        self.tbss_screen_shot_dir = self.tbss_all_out_dir / 'snapshots'
+        self.web_summary_dir = self.derivatives_root / 'web_summary'
+        self.web_summary_file = self.web_summary_dir / \
+                f'{self.site}.html'
 
         # set settings from config
-        config_loc = '/Users/kc244/ENIGMA_CHR_DTI/enigmaObjPipe/config.ini'
+        config_loc = '/opt/ENIGMA_CHR_DTI/enigmaObjPipe/config.ini'
         config = read_objPipe_config(config_loc)
         for subject in self.subject_classes:
             for key in config['software']:
                 setattr(subject, key, config['software'][key])
-        
+
             for key in config['proc']:
                 setattr(subject, key, config['proc'][key])
 
+            subject.study_summary_file = self.web_summary_file
+
+
     def project_pipeline(self, force: bool = False):
         '''Study wise pipeline'''
-        # 5. run eddy QC
-        self.eddy_qc(force)
 
-        # 6. run tbss
-        self.tbss_all = '/Users/kc244/tbss/lib/tbss_all'
-        self.tbss_all_modalities = ['dti_FA']
-        self.tbss_all_modalities_str = ['FA']
-        self.run_tbss(force)
+        # Run subject level preprocessing
+        for subject in self.subject_classes:
+            subject.subject_pipeline()
 
-        # 7. run randomise
-        self.run_randomise(force)
+        # Run tbss
+        self.tbss_all_modalities = ['dti_FA', 'dti_RD', 'dti_MD', 'dti_L1']
+        self.tbss_all_modalities_str = ['FA', 'RD', 'MD', 'AD']
+        self.create_tbss_all_csv(self.tbss_all_out_dir)
+        self.execute_tbss(force)
+        
+        # Study progress
+        self.build_study_progress()
+        self.dicom_header_summary()
+        self.nifti_header_summary()
+        self.head_motion_summary()
+        self.tbss_summary()
+        self.tbss_qc(force)
 
-        # 8. log
-        self.leave_log_enigma_diff_preproc_pipeline(force)
+        create_project_summary(self, self.web_summary_file)
 
-
-    # def eddy_qc_study(self, force: bool = False):
-        # '''pass'''
-
-        # eddy_prefix_list = [x.diff_ep for x in self.subject_classes]
-        # eddyDirectories = EddyDirectories(eddy_prefix_list, pnl=args.pnl)

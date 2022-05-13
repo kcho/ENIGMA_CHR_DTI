@@ -15,6 +15,7 @@ from nifti_snapshot import nifti_snapshot
 Num = Union[int, float]
 Paths = Union[Path, str]
 
+
 class DwiExtraction(object):
     '''Brain extraction methods'''
     def return_b0_indices(self) -> np.array:
@@ -122,17 +123,22 @@ class DwiExtraction(object):
 class DwiPipe(object):
     def fsl_tensor_fit(self, force: bool = False):
         '''Fit tensor and decompose into diffusion scalar maps'''
-        for i in ['FA', 'L1', 'L2', 'L3', 'MD', 'MO', 'S0', 'V1', 'V2', 'V3']:
-            setattr(self, f'dti_{i}', self.diff_dir / f'dti_{i}.nii.gz')
-
         command = f'dtifit \
             --data={self.diff_ep}.nii.gz \
             --out={self.diff_dir / "dti"} \
             --mask={self.diff_mask} \
-            --bvecs={self.diff_ep}.eddy_rotated_bvecs \
+            --bvecs={self.diff_ep_bvec} \
             --bvals={self.diff_raw_bval}'
 
         if force or not self.dti_FA.is_file():
+            self.run(command)
+
+        command = f'fslmaths \
+                {self.dti_L2} -add {self.dti_L3} \
+                {self.diff_dir}/L1_L2_added && \
+                fslmaths \
+                {self.diff_dir}/L1_L2_added -div 2 {self.dti_RD}'
+        if force or not self.dti_RD.is_file():
             self.run(command)
 
 
@@ -191,10 +197,18 @@ class DwiPipe(object):
 
         self.eddyRun = eddyRun
 
+        eddyRun.save_all_outlier_slices_in_detail(self.eddy_qc_dir, force)
+
+        if force and not (self.eddy_qc_dir / 'motion.csv').is_file():
+            eddyRun.df_motion.to_csv(self.eddy_qc_dir / 'motion.csv')
+
+        if force and not (self.eddy_qc_dir / 'outlier_slices.csv').is_file():
+            eddyRun.df.to_csv(self.eddy_qc_dir / 'outlier_slices.csv')
+
         if force or not (self.eddy_qc_dir / 'eddy_summary.html').is_file():
             # create summary
-            eddyRun.save_all_outlier_slices_in_detail(self.eddy_qc_dir)
             create_html(eddyRun, out_dir=self.eddy_qc_dir)
+
 
     def screen_shots(self, force: bool = False):
         '''Screen shot images'''
@@ -209,3 +223,49 @@ class DwiPipe(object):
                 cbar_title='FA',
                 output_file=out_file,
                 )
+
+class DwiToolsStudy(object):
+    def head_motion_summary(self):
+        self.head_motion_df_html = pd.concat(
+                [x.eddyRun.df_motion for x in self.subject_classes]).to_html(
+                classes=["table-bordered", "table-striped", "table-hover"]
+            )
+
+    def nifti_header_summary(self):
+        self.nifti_df = pd.DataFrame(
+                [x.nifti_header_series for x in self.subject_classes])
+        self.nifti_df = self.nifti_df.astype(str)
+        cols_to_check = [x for x in self.nifti_df.columns if x != 'subject']
+        self.nifti_df_unique = self.nifti_df.groupby(cols_to_check)
+        self.nifti_df_html = self.nifti_df_unique.count().T.to_html(
+                classes=["table-bordered", "table-striped", "table-hover"]
+                )
+
+    def count_subject(self, var):
+        '''Count subjects with existing file for var attribute'''
+        num = sum([getattr(x, var).is_file() for x in self.subject_classes])
+        return num
+
+    def build_study_progress(self):
+        '''Build for study summary'''
+        self.number_of_subjects = len(self.subjects)
+        self.pass_dicom = len(
+                [sum(~x.dicom_header_series.isnull()) > 3 for x
+                    in self.subject_classes])
+        self.pass_bvec = self.count_subject('diff_raw_bvec')
+        self.pass_bval = self.count_subject('diff_raw_bval')
+        self.pass_dwi = self.count_subject('diff_raw_dwi')
+        self.pass_unring = self.count_subject('diff_dwi_unring')
+        self.pass_mask = self.count_subject('diff_mask')
+        self.pass_eddy = self.count_subject('diff_ep_out')
+        self.pass_eddy_bvec = self.count_subject('diff_ep_bvec')
+        self.pass_dtifit = self.count_subject('dti_FA')
+
+        self.started_tbss = self.tbss_stats_dir.is_dir()
+        self.completed_tbss = (self.tbss_stats_dir / 'FA_combined_roi.csv'
+                ).is_file()
+
+        self.tree_out = {}
+        for title, dir_path in {'TBSS': self.tbss_all_out_dir}.items():
+            tree_out_text = os.popen(f'tree {dir_path}').read()
+            self.tree_out[title] = tree_out_text
