@@ -1,0 +1,10 @@
+pydicom==2.1.2
+Jinja2==2.11.3
+numpy==1.20.3
+dipy==0.16.0
+pandas==1.3.2
+pdfkit==0.6.1
+eddy_squeeze.egg==info
+nibabel==3.2.2
+eddy_squeeze==1.0.7
+nifti_snapshot==0.1.13
