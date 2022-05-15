@@ -76,6 +76,8 @@ RUN mkdir -p /tmp/ants/build \
 
 RUN cd /tmp/ants/build && cmake --build . -j 4
 RUN cd /tmp/ants/build && cmake --install .
+RUN cd /tmp/ants/build/ANTS-build && make install 2>&1 | tee install.log
+
 ENV ANTSPATH="/opt/ants/bin" \
     PATH="/opt/ants/bin:$PATH" \
     LD_LIBRARY_PATH="/opt/ants/lib:$LD_LIBRARY_PATH"
