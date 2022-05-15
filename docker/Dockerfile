@@ -1,3 +1,4 @@
+# Use UBUNTU Bionic
 FROM ubuntu:bionic-20200112 as builder
 
 
@@ -47,7 +48,7 @@ RUN echo "Downloading FSL ..." \
 RUN echo "Installing FSL conda environment ..." \
     && bash /opt/fsl-6.0.4/etc/fslconf/fslpython_install.sh -f /opt/fsl-6.0.4
 
-# ANTS
+# Installing ANTS
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
                     apt-transport-https \
@@ -87,7 +88,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 
-# miniconda
+# Install miniconda
 ENV CONDA_DIR="/opt/miniconda-latest" \
     PATH="/opt/miniconda-latest/bin:$PATH"
 
@@ -152,6 +153,7 @@ RUN pip install nifti-snapshot
 # ENIGMA CHR pipeline
 RUN git clone https://github.com/kcho/ENIGMA_CHR_DTI /opt/ENIGMA_CHR_DTI
 ENV PYTHONPATH="/opt/ENIGMA_CHR_DTI:${PYTHONPATH}"
+RUN pip install -r /opt/ENIGMA_CHR_DTI/requirements.txt
 
 
 # dcm2niix
@@ -180,4 +182,4 @@ WORKDIR /data
 RUN apt-get install -y x11-apps
 
 #CMD ["/bin/bash"]
-CMD ["xvfb-run python /opt/ENIGMA_CHR_DTI/script/enigma_chr_pipeline.py"]
+CMD ["xvfb-run python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py"]
