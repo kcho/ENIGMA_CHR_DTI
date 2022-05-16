@@ -174,6 +174,7 @@ RUN apt-get update \
 
 RUN git clone https://bitbucket.org/reisert/unring.git /opt/unring
 ENV PATH="/opt/unring/fsl:$PATH"
+ENV enigma_data_dir="/opt/tbss/data/enigmaDTI" 
 
 # check softwares
 RUN dipy_gibbs_ringing -h
