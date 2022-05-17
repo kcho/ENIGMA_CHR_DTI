@@ -155,6 +155,7 @@ RUN pip install nifti-snapshot
 # ENIGMA CHR pipeline
 RUN git clone https://github.com/kcho/ENIGMA_CHR_DTI /opt/ENIGMA_CHR_DTI
 ENV PYTHONPATH="/opt/ENIGMA_CHR_DTI:${PYTHONPATH}"
+ENV PATH="/opt/ENIGMA_CHR_DTI/scripts:${PATH}"
 RUN pip install -r /opt/ENIGMA_CHR_DTI/requirements.txt
 
 

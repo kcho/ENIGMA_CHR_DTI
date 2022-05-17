@@ -88,6 +88,9 @@ docker run -it -v ${enigma_chr_dir}:/data kcho/enigma-chr-pipeline
 
 Run the code below to compress the file to share.
 
+```
+docker run -it -v ${enigma_chr_dir}:/data kcho/enigma-chr-pipeline collect_outputs.py
+```
 Here is the list of files to share
 
 ```
