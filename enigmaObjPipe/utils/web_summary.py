@@ -3,6 +3,8 @@ import re
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
 import pdfkit
+from eddy_squeeze.eddy_squeeze_lib.eddy_web import \
+        replace_image_locations_to_relative_in_html
 
 
 root = Path(os.path.abspath(__file__)).parent.parent.parent
@@ -50,6 +52,8 @@ def create_subject_summary(Subject: object, out_html: Path, **kwargs):
                      str(out_html.with_suffix('.pdf')),
                      options=options)
 
+    replace_image_locations_to_relative_in_html(out_html, out_dir)
+
 
 def create_project_summary(Study: object, out_html: Path, **kwargs):
     '''Create html that summarizes subject'''
@@ -70,4 +74,6 @@ def create_project_summary(Study: object, out_html: Path, **kwargs):
     pdfkit.from_file(str(out_html),
                      str(out_html.with_suffix('.pdf')),
                      options=options)
+
+    replace_image_locations_to_relative_in_html(out_html, out_dir)
 
