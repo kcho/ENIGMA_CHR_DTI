@@ -184,5 +184,5 @@ WORKDIR /data
 
 RUN apt-get install -y x11-apps
 
-#CMD ["/bin/bash"]
-CMD ["xvfb-run python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py"]
+CMD xvfb-run python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py
+

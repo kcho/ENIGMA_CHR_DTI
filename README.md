@@ -36,6 +36,19 @@ This repository has all the codes required
 
 1. Install Docker
 
+[Download Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+
+2. Configure Docker
+- Preferences - 
+
+
+3. Download ENIGMA CHR DTI pipeline docker container.
+
+```
+docker pull enigma-chr-pipeline:latest
+```
+
 
 2. Build a docker image from the `Dockerfile`
 
