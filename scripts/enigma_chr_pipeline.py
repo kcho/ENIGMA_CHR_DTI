@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from enigmaObjPipe.enigma_chr_pipeline import EnigmaChrStudy
 
 if __name__ == '__main__':
