@@ -148,6 +148,7 @@ RUN /bin/bash /opt/tbss/install.sh setup
 
 # eddy-squeeze
 #RUN git clone https://github.com/pnlbwh/eddy-squeeze /opt/eddy-squeeze
+RUN pwd
 RUN pip install eddy-squeeze
 RUN pip install nifti-snapshot
 
@@ -184,7 +185,6 @@ RUN dipy_gibbs_ringing -h
 WORKDIR /data
 
 RUN apt-get install -y x11-apps
-RUN pwd
 RUN pwd
 RUN pwd
 RUN cd /opt/ENIGMA_CHR_DTI && git pull
