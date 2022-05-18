@@ -6,7 +6,7 @@ from dipy.segment.mask import median_otsu
 
 
 class EddyPipe(object):
-    def eddy(self, force):
+    def eddy(self, force: bool = False, test: bool = False):
         '''FSL Eddy'''
         # index
         data_img = nb.load(self.diff_dwi_unring)
@@ -38,7 +38,7 @@ class EddyPipe(object):
 
         # eddy_command
         eddy_command = f'OMP_NUM_THREADS={self.omp_num_threads} {self.eddy_openmp} \
-            --imain={self.diff_raw_dwi} \
+            --imain={self.diff_dwi_unring} \
             --mask={self.diff_mask} \
             --index={index_loc} \
             --acqp={acqp_loc} \
@@ -53,8 +53,10 @@ class EddyPipe(object):
             eddy_command = eddy_command + ' --data_is_shelled'
 
         if not self.diff_ep.with_suffix('.nii.gz').is_file() or force:
-            self.run(eddy_command)
-
+            if test:
+                self.create_fake_eddy_output(eddy_command)
+            else:
+                self.run(eddy_command)
 
     def eddy_squeeze(self, force: bool = False):
         '''Eddy QC', force: bool = False'''
@@ -79,3 +81,55 @@ class EddyPipe(object):
         self.eddyQc.df.to_csv(out_dir / 'outlier_slices.csv')
 
         eddy_web.create_html(self.eddyQc, out_dir=out_dir)
+
+    def create_fake_eddy_output(self, eddy_command):
+        '''Create fake eddy output'''
+        import shutil
+        shutil.copy(self.diff_dwi_unring, self.diff_ep.with_suffix('.nii.gz'))
+        shutil.copy(self.diff_dwi_unring,
+                    str(self.diff_ep) + '.eddy_outlier_free_data.nii.gz')
+        shutil.copy(self.diff_raw_bvec,
+                    str(self.diff_ep) + '.eddy_rotated_bvecs')
+
+        with open(self.diff_ep.with_suffix('.eddy_command_txt'), 'w') as fp:
+            fp.write(eddy_command)
+
+        motion_array = np.random.rand(100, 2)
+        np.savetxt(str(self.diff_ep) + '.eddy_movement_rms',
+                   motion_array)
+        np.savetxt(str(self.diff_ep) + '.eddy_restricted_movement_rms',
+                   motion_array)
+
+        outlier_map_arr = np.random.randint(0, 100, 25).reshape(5, 5)
+        np.savetxt(str(self.diff_ep) + '.eddy_outlier_map',
+                   outlier_map_arr, header='fake header')
+        np.savetxt(str(self.diff_ep) + '.eddy_outlier_n_sqr_stdev_map',
+                   outlier_map_arr, header='fake header')
+
+        with open(self.diff_ep.with_suffix('.eddy_outlier_report'), 'w') as fp:
+            fp.write('Slice 28 in scan 80 is an outlier with mean -5.12091 '
+                     'standard deviations off, and mean squared 2.95609 '
+                     'standard deviations off.')
+        np.savetxt(str(self.diff_ep) + '.eeddy_parameters',
+                   outlier_map_arr, header='fake header')
+
+
+        text_to_write = '''
+        These between shell PE-translations were calculated using MI between shell means
+        PE-translations (mm) relative b0-shell from direct registration to mean b0
+        Shell 1e+03 to b0-shell: PE-translation = -0.285 mm
+        Shell 2e+03 to b0-shell: PE-translation = 0.847 mm
+        Shell 3e+03 to b0-shell: PE-translation = 0.846 mm
+
+        Relative PE-translations (mm) between the shells
+        Shell 2e+03 to shell 1e+03: PE-translation = 0.874 mm
+        Shell 3e+03 to shell 1e+03: PE-translation = 0.878 mm
+
+        Deduced PE-translations (mm) relative b0-shell
+        Shell 1e+03 to b0-shell: PE-translation = -0.285 mm
+        Shell 2e+03 to b0-shell: PE-translation = 0.847 mm
+        Shell 3e+03 to b0-shell: PE-translation = 0.846 mm'''
+
+        with open(self.diff_ep.with_suffix(
+            '.eddy_post_eddy_shell_PE_translation_parameters'), 'w') as fp:
+            fp.write(text_to_write.strip())

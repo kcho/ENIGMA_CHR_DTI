@@ -49,7 +49,7 @@ def compress_outputs():
             shutil.copytree(tbss_root / 'snapshots',
                             Path(fp) / 'tbss' / 'snapshots')
 
-        if len(Path(fp).glob('*')) > 1:
+        if len(list(Path(fp).glob('*'))) > 1:
             shutil.make_archive('/data/output_collection', 'zip', fp)
         else:
             print('No data to collect')

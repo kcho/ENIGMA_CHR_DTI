@@ -65,7 +65,7 @@ class EnigmaChrSubjectDicomDir(
                 f'{self.subject_name}.html'
 
 
-    def subject_pipeline(self, force: bool = False):
+    def subject_pipeline(self, force: bool = False, test: bool = False):
         '''Subject-wise pipeline'''
         # 1. check basic dicom information from dicom headers
         self.check_dicom_info(force)
@@ -90,7 +90,7 @@ class EnigmaChrSubjectDicomDir(
         # self.topup_preparation_ampscz(force)
 
         # 4c. run Eddy
-        self.eddy(force)
+        self.eddy(force, test)
         self.snapshot_first_b0(self.diff_mask, 'mask', force)
         self.snapshot_first_b0(self.diff_ep.with_suffix('.nii.gz'),
                                'Eddy DWI', force)
@@ -186,12 +186,12 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
 
         self.tbss_all = subject.tbss_all
 
-    def project_pipeline(self, force: bool = False):
+    def project_pipeline(self, force: bool = False, test: bool = False):
         '''Study wise pipeline'''
 
         # Run subject level preprocessing
         for subject in self.subject_classes:
-            subject.subject_pipeline()
+            subject.subject_pipeline(force=force, test=test)
 
         # Run tbss
         self.tbss_all_modalities = ['dti_FA', 'dti_RD', 'dti_MD', 'dti_L1']
