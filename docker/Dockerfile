@@ -184,6 +184,7 @@ RUN dipy_gibbs_ringing -h
 WORKDIR /data
 
 RUN apt-get install -y x11-apps
+RUN pwd
 RUN cd /opt/ENIGMA_CHR_DTI && git pull
 
 CMD xvfb-run python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py
