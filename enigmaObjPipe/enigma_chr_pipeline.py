@@ -80,6 +80,7 @@ class EnigmaChrSubjectDicomDir(
 
         # 4. Diffusion preprocessing
         # 4a. gibbs unring
+        print('Gibbs Unring')
         self.run_gibbs_unring(self.diff_raw_dwi, self.diff_dwi_unring, force)
         self.snapshot_first_b0(self.diff_dwi_unring, 'Unring DWI', force)
         self.snapshot_diff_first_b0(self.diff_dwi_unring, self.diff_raw_dwi,
@@ -90,6 +91,7 @@ class EnigmaChrSubjectDicomDir(
         # self.topup_preparation_ampscz(force)
 
         # 4c. run Eddy
+        print('Running Eddy - may take 1~2 hours')
         self.eddy(force, test)
         self.snapshot_first_b0(self.diff_mask, 'mask', force)
         self.snapshot_first_b0(self.diff_ep.with_suffix('.nii.gz'),
@@ -103,6 +105,7 @@ class EnigmaChrSubjectDicomDir(
         self.eddyRun.df_motion.index = [self.subject_name]
 
         # 6. Tensor fit & decomp
+        print('Tensor fit')
         self.fsl_tensor_fit(force)
 
         # 7. Capture maps

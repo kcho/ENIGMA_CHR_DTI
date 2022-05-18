@@ -52,7 +52,7 @@ def create_subject_summary(Subject: object, out_html: Path, **kwargs):
                      str(out_html.with_suffix('.pdf')),
                      options=options)
 
-    replace_image_locations_to_relative_in_html(out_html, out_dir)
+    replace_image_locations_to_relative_in_html(Path(out_html), out_dir)
 
 
 def create_project_summary(Study: object, out_html: Path, **kwargs):
@@ -75,5 +75,5 @@ def create_project_summary(Study: object, out_html: Path, **kwargs):
                      str(out_html.with_suffix('.pdf')),
                      options=options)
 
-    replace_image_locations_to_relative_in_html(out_html, out_dir)
+    replace_image_locations_to_relative_in_html(Path(out_html), out_dir)
 
