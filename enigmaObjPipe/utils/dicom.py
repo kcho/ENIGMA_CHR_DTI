@@ -29,7 +29,10 @@ class DicomTools(object):
                     })
 
                 for i in list_of_items_to_get:
-                    self.dicom_header_series[i] = getattr(dicom, i)
+                    try:
+                        self.dicom_header_series[i] = getattr(dicom, i)
+                    except:
+                        self.dicom_header_series[i] = 'missing'
 
                 return
 

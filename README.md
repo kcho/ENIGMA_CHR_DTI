@@ -26,9 +26,13 @@ Example output
 
 ## Introduction
 
-This repository has all the codes required 
+This container includes following softwares. Please cite them if you use this container in your study.
 
-1. Pipeline
+- [FSL (and FSL unring)](https://fsl.fmrib.ox.ac.uk/)
+- [ANTs](https://github.com/ANTsX/ANTs)
+- [PNL TBSS](https://github.com/pnlbwh/TBSS)
+- [`eddy-squeeze`](https://github.com/pnlbwh/eddy-squeeze)
+- [`nifti-snapshot`](https://github.com/pnlbwh/nifti-snapshot)
 
 
 
