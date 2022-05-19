@@ -105,9 +105,9 @@ class DwiPipe(object):
             with open(temp.name, 'w') as f:
                 f.write(str(input_file.absolute()))
 
-            command = f'{self.CNN_DMS}/pipeline/dwi_masking.py \
+            command = f'{self.cnn_dms}/pipeline/dwi_masking.py \
                 -i {temp.name} \
-                -f {self.CNN_DMS}/model_folder \
+                -f {self.cnn_dms}/model_folder \
                 -nproc 5'
 
             self.run(command)
