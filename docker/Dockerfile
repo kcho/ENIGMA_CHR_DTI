@@ -154,6 +154,21 @@ RUN pip install eddy-squeeze
 RUN pip install nifti-snapshot
 
 
+# clone https://github.com/pnlbwh/CNN-Diffusion-MRIBrain-Segmentation
+RUN git clone https://github.com/pnlbwh/CNN-Diffusion-MRIBrain-Segmentation /opt/CNN-Diffusion-MRIBrain-Segmentation
+# && conda env create -f environment_cpu.yml
+RUN pip install tensorflow==2.9.0
+RUN pip install keras==2.9.0
+RUN pip install prompt-toolkit==2.0.1
+RUN pip install scikit-image==0.16.2
+RUN pip install git+https://github.com/pnlbwh/conversion.git
+RUN cd /opt/CNN-Diffusion-MRIBrain-Segmentation && \
+    wget https://github.com/pnlbwh/CNN-Diffusion-MRIBrain-Segmentation/releases/download/v0.3/model_folder.tar.gz && \
+    tar -xzvf model_folder.tar.gz && \
+    cd model_folder && \
+    wget https://www.nitrc.org/frs/download.php/11290/IITmean_b0_256.nii.gz
+
+
 # ENIGMA CHR pipeline
 RUN git clone https://github.com/kcho/ENIGMA_CHR_DTI /opt/ENIGMA_CHR_DTI
 ENV PYTHONPATH="/opt/ENIGMA_CHR_DTI:${PYTHONPATH}"

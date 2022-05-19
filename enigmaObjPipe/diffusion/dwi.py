@@ -95,25 +95,22 @@ class DwiExtraction(object):
                             '_mask.nii.gz'),
                     self.diff_mask)
 
-    def CNN_brain_extraction(self):
-
+    def CNN_brain_extraction(self, input_file: Path, output_file: Path):
         temp = tempfile.NamedTemporaryFile(mode='w+t', suffix='.txt')
 
         try:
             with open(temp.name, 'w') as f:
-                f.write(str(self.diff_xc_dwi.absolute()))
+                f.write(str(input_file.absolute()))
 
-            command = f'source /home/kcho/anaconda3/bin/activate;\
-                    conda activate dmri_seg; \
-                    {self.CNN_DMS}/pipeline/dwi_masking.py \
-                    -i {temp.name} \
-                    -f {self.CNN_DMS}/model_folder \
-                    -nproc 5'
+            command = f'{self.CNN_DMS}/pipeline/dwi_masking.py \
+                -i {temp.name} \
+                -f {self.CNN_DMS}/model_folder \
+                -nproc 5'
 
             self.run(command)
-            out_mask = self.diff_dir / (self.diff_xc_dwi.name.split('.')[0] + 
+            out_mask = input_file.parent / (input_file.name.split('.')[0] + 
                     '_bse-multi_BrainMask.nii.gz')
-            shutil.copy(out_mask, self.diff_mask)
+            shutil.copy(out_mask, output_file)
 
         finally:
             temp.close()

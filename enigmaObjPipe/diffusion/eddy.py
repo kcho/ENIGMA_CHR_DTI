@@ -9,18 +9,22 @@ class EddyPipe(object):
     def eddy(self, force: bool = False, test: bool = False):
         '''FSL Eddy'''
         # index
-        data_img = nb.load(self.diff_dwi_unring)
 
         if force or not self.diff_mask.is_file():
-            print('Estimating mask')
-            data = data_img.get_fdata()
+            # previous masking using dipy
+            # print('Estimating mask')
+            # data = data_img.get_fdata()
 
-            data = data[:, :, :, self.b0_index].mean(axis=3)
-            _, mask = median_otsu(data, median_radius=2, numpass=1)
-            nb.Nifti1Image(mask.astype(int),
-                           affine=data_img.affine).to_filename(
-                                   self.diff_mask)
+            # data = data[:, :, :, self.b0_index].mean(axis=3)
+            # _, mask = median_otsu(data, median_radius=2, numpass=1)
+            # nb.Nifti1Image(mask.astype(int),
+                           # affine=data_img.affine).to_filename(
+                                   # self.diff_mask)
 
+            # new masking using CNN masking
+            self.CNN_brain_extraction(self.diff_dwi_unring, self.diff_mask)
+
+        data_img = nb.load(self.diff_dwi_unring)
         index_array = np.tile(1, data_img.shape[-1])
         index_loc = self.eddy_out_dir / 'index.txt'
         if force or not index_loc.is_file():

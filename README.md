@@ -28,6 +28,7 @@ Example output
 
 This container includes following softwares. Please cite them if you use this container in your study.
 
+- [`dcm2niix`]()
 - [FSL (and FSL unring)](https://fsl.fmrib.ox.ac.uk/)
 - [ANTs](https://github.com/ANTsX/ANTs)
 - [PNL TBSS](https://github.com/pnlbwh/TBSS)
