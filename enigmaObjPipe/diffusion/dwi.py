@@ -95,6 +95,9 @@ class DwiExtraction(object):
                             '_mask.nii.gz'),
                     self.diff_mask)
 
+
+
+class DwiPipe(object):
     def CNN_brain_extraction(self, input_file: Path, output_file: Path):
         temp = tempfile.NamedTemporaryFile(mode='w+t', suffix='.txt')
 
@@ -115,9 +118,6 @@ class DwiExtraction(object):
         finally:
             temp.close()
 
-
-
-class DwiPipe(object):
     def fsl_tensor_fit(self, force: bool = False):
         '''Fit tensor and decompose into diffusion scalar maps'''
         command = f'dtifit \

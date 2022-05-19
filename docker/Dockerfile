@@ -155,7 +155,7 @@ RUN pip install nifti-snapshot
 
 
 # clone https://github.com/pnlbwh/CNN-Diffusion-MRIBrain-Segmentation
-RUN git clone https://github.com/pnlbwh/CNN-Diffusion-MRIBrain-Segmentation /opt/CNN-Diffusion-MRIBrain-Segmentation
+RUN git clone https://github.com/kcho/CNN-Diffusion-MRIBrain-Segmentation /opt/CNN-Diffusion-MRIBrain-Segmentation
 # && conda env create -f environment_cpu.yml
 RUN pip install tensorflow==2.9.0
 RUN pip install keras==2.9.0
@@ -187,8 +187,8 @@ RUN /opt/dcm2niix/dcm2niix -h
 
 
 # unring
-RUN apt-get update \
-    && apt-get install -y libfftw3-dev wkhtmltopdf xvfb tree
+RUN apt-get update && \
+    apt-get install -y libfftw3-dev wkhtmltopdf xvfb tree
 
 RUN git clone https://bitbucket.org/reisert/unring.git /opt/unring
 ENV PATH="/opt/unring/fsl:$PATH"
