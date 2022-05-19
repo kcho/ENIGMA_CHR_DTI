@@ -22,7 +22,7 @@ class EddyPipe(object):
                                    # self.diff_mask)
 
             # new masking using CNN masking
-            self.CNN_brain_extraction(self.diff_dwi_unring, self.diff_mask)
+            self.CNN_brain_extraction(self.diff_raw_dwi, self.diff_mask)
 
         data_img = nb.load(self.diff_dwi_unring)
         index_array = np.tile(1, data_img.shape[-1])
