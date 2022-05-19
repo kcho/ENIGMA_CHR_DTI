@@ -3,6 +3,7 @@ import numpy as np
 import nibabel as nb
 import sys
 from dipy.segment.mask import median_otsu
+import shutil
 
 
 class EddyPipe(object):
@@ -22,7 +23,12 @@ class EddyPipe(object):
                                    # self.diff_mask)
 
             # new masking using CNN masking
-            self.CNN_brain_extraction(self.diff_raw_dwi, self.diff_mask)
+            # self.CNN_brain_extraction(self.diff_raw_dwi, self.diff_mask)
+            shutil.copy(self.diff_raw_bval,
+                        str(self.diff_dwi_unring).split('.')[0] + '.bval')
+            shutil.copy(self.diff_raw_bvec,
+                        str(self.diff_dwi_unring).split('.')[0] + '.bvec')
+            self.CNN_brain_extraction(self.diff_dwi_unring, self.diff_mask)
 
         data_img = nb.load(self.diff_dwi_unring)
         index_array = np.tile(1, data_img.shape[-1])
