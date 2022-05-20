@@ -45,10 +45,17 @@ class EnigmaChrSubjectDicomDir(
 
         self.repol_on = True
 
+
         # diffusion scalar maps from dtifit
         for i in ['FA', 'L1', 'L2', 'L3', 'MD',
                   'MO', 'S0', 'V1', 'V2', 'V3', 'RD']:
             setattr(self, f'dti_{i}', self.diff_dir / f'dti_{i}.nii.gz')
+
+        # preproc completed
+        if self.dti_FA.is_file():
+            self.preproc_completed = True
+        else:
+            self.preproc_completed = False
 
         # eddy qc output directory
         self.eddy_qc_dir = self.derivatives_root / \
@@ -109,6 +116,7 @@ class EnigmaChrSubjectDicomDir(
         self.fsl_tensor_fit(force)
 
         # 7. Capture maps
+        print('Snapshots')
         self.snapshot_first_b0(self.dti_FA, 'FA', force)
         self.snapshot_first_b0(self.dti_MD, 'MD', force)
         self.snapshot_first_b0(self.dti_RD, 'RD', force)
@@ -126,6 +134,8 @@ class EnigmaChrSubjectDicomDir(
         # # 8. HTML summary
         create_subject_summary(self, self.web_summary_file)
 
+        self.preproc_completed = True
+
 
 
 class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
@@ -138,7 +148,7 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
 
         Expected data structure:
             /home/kevin/enigma_root_dir  <- `root_dir`
-            └── source
+            └── sourcedata
                 ├── subject_01
                 │   ├── dicom_00001.dcm
                 │   ├── dicom_00002.dcm
@@ -163,6 +173,18 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         self.source_dir = self.root_dir / 'sourcedata'
         self.subjects = list(sorted([x for x in self.source_dir.glob('*')
             if not x.name.startswith('.')]))
+        
+        # make sure there are at least one subject
+        if len(self.subjects) < 1:
+            print('Please make sure your data is arranged correctly')
+            print("1. Please check if you have 'sourcedata' directory under "
+                  "your root data directory")
+            print("2. Please check if you have subject directories under "
+                  "'sourcedata' directory")
+            print("3. Please check if you have dicoms under the subject "
+                  "directories.")
+            sys.exit('Exiting without running the pipeline')
+
         self.subject_classes = [EnigmaChrSubjectDicomDir(x) for x
                                 in self.subjects]
 
@@ -194,13 +216,24 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
 
         # Run subject level preprocessing
         for subject in self.subject_classes:
-            subject.subject_pipeline(force=force, test=test)
+            try:
+                subject.subject_pipeline(force=force, test=test)
+            except:
+                print('***')
+                print('Error in preprocessing {subject.subject_name}')
+                print('***')
 
         # Run tbss
         self.tbss_all_modalities = ['dti_FA', 'dti_RD', 'dti_MD', 'dti_L1']
         self.tbss_all_modalities_str = ['FA', 'RD', 'MD', 'AD']
         self.create_tbss_all_csv(self.tbss_all_out_dir)
-        self.execute_tbss(force)
+        if len([x for x in subject.subject_classes
+                if x.preproc_completed]) > 1:
+            self.execute_tbss(force)
+        else:
+            print('***')
+            print('Not enough preprocessed subjects to run TBSS')
+            print('***')
         
         # Study progress
         self.build_study_progress()

@@ -30,6 +30,7 @@
             <th scope="col">Eddy</td>
             <th scope="col">Eddy corrected bvec</td>
             <th scope="col">DTIFIT</td>
+            <th scope="col">Preproc completed</td>
             <th scope="col">TBSS started</td>
             <th scope="col">TBSS completed</td>
         </tr>
@@ -88,6 +89,12 @@
                 <td style ="background-color: red" scope="col"><p style="color:white">{{ study.pass_dtifit }}</p></td>
             {% else %}
                 <td scope="col">{{ study.pass_dtifit }}</td>
+            {% endif %}
+
+            {% if study.completed_preproc < study.number_of_subjects %}
+                <td style ="background-color: red" scope="col"><p style="color:white">{{ study.completed_preproc }}</p></td>
+            {% else %}
+                <td scope="col">{{ study.completed_preproc }}</td>
             {% endif %}
 
             {% if study.started_tbss %}

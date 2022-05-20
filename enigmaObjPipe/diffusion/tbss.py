@@ -20,7 +20,9 @@ class StudyTBSS(object):
         self.tbss_all_input_csv = self.tbss_all_out_dir / 'imagelist.csv'
         with open(self.tbss_all_input_csv, 'w') as f:
             for subject in self.subject_classes:
-                print(subject)
+                if not subject.preproc_completed:
+                    continue
+
                 line_to_write = ','.join(
                     [str(getattr(subject, x)) for x in self.tbss_all_modalities])
                 f.write(line_to_write+'\n')
@@ -30,6 +32,9 @@ class StudyTBSS(object):
         self.tbss_all_caselist_csv = self.tbss_all_out_dir / 'caselist.csv'
         with open(self.tbss_all_caselist_csv, 'w') as f:
             for subject in self.subject_classes:
+                if not subject.preproc_completed:
+                    continue
+
                 f.write(subject.subject_name+'\n')
         # self.logger.info('TBSS input caselist is written')
 
