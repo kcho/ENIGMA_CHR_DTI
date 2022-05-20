@@ -10,28 +10,29 @@ email: kevincho@bwh.harvard.edu
 
 ## Contents
 
-Introduction
-
-Installation
-
-Arranging data for the pipeline
-
-Running the ENIGMA CHR DTI Pipeline
-
-Example output
-
-
+- Introduction
+- Citation
+- Installation
+- Arranging data for the pipeline
+- Running the ENIGMA CHR DTI Pipeline
+- Sharing outputs to other teams
 
 
 
 ## Introduction
 
-This container includes following softwares. Please cite them if you use this container in your study.
 
-- [`dcm2niix`]()
+
+## Citation
+
+This container uses following softwares. Please cite them if you use this container in your study.
+
+- [`dcm2niix`](https://github.com/rordenlab/dcm2niix)
 - [FSL (and FSL unring)](https://fsl.fmrib.ox.ac.uk/)
 - [ANTs](https://github.com/ANTsX/ANTs)
 - [PNL TBSS](https://github.com/pnlbwh/TBSS)
+- [CNN based diffusion MRI brain segmentation tool](https://github.com/pnlbwh/CNN-Diffusion-MRIBrain-Segmentation)
+- [`objPipe`](https://github.com/kcho/objPipe)
 - [`eddy-squeeze`](https://github.com/pnlbwh/eddy-squeeze)
 - [`nifti-snapshot`](https://github.com/pnlbwh/nifti-snapshot)
 
@@ -39,49 +40,21 @@ This container includes following softwares. Please cite them if you use this co
 
 ## Installation
 
-1. Install Docker Desktop
+1. Install and configure Docker Desktop
 
-[Download Docker Desktop](https://www.docker.com/products/docker-desktop/)
-
-
-2. Configure Docker
-
-- Preferences
-- at least 4 cores (8 cores preferably)
-- at least 4 GB RAM (8 GB preferably)
-- at least 40 GB of space (8 GB preferably)
+- [Download Docker Desktop](https://www.docker.com/products/docker-desktop/)
+    - with at least 4 cores (8 cores preferably) and 4 GB RAM (8 GB preferably)
 
 
-3. Download ENIGMA CHR DTI pipeline docker container.
+2. Download ENIGMA CHR DTI docker image.
 
 In terminal or power-shell, type
 ```
 $ docker pull kcho/enigma-chr-pipeline
 ```
 
-4. Test the pipeline
+3. [Test the pipeline](how_to_test_pipeline.md)
 
-```
-test_data_dir=~/test_ENIGMA_CHR_DTI
-mkdir ${test_data_dir}
-cd ${test_data_dir}
-
-wget https://github.com/kcho/ENIGMA_CHR_DTI/releases/download/example_dwi_data_light/test_data_git.zip
-unzip test_data_git.zip
-rm test_data_git.zip
-mv ${test_data_dir}/test_data_git ${test_data_dir}/sourcedata
-
-cp -r ${test_data_dir}/sourcedata/subject_01 \
-    ${test_data_dir}/sourcedata/subject_02
-
-docker run -it \
-    -v ${test_data_dir}:/data \
-    kcho/enigma-chr-pipeline
-
-docker run -it \
-    -v ${test_data_dir}:/data \
-    kcho/enigma-chr-pipeline collect_outputs.py
-```
 
 ## Arranging data for the pipeline
 
@@ -95,7 +68,6 @@ docker run -it \
     ├── subject_02
     │   └── ...
     └── subject_XX
-
 ```
 
 
@@ -110,14 +82,15 @@ docker run -it -v ${enigma_chr_dir}:/data kcho/enigma-chr-pipeline
 ```
 
 
-## Sharing the outputs
+## Sharing outputs to other teams
 
-Run the code below to compress the file to share.
+Run the code below to collect and compress the files to share.
 
 ```
 docker run -it -v ${enigma_chr_dir}:/data kcho/enigma-chr-pipeline collect_outputs.py
 ```
-Here is the list of files to share
+
+Here is the list of files collected by `collect_outputs.py`
 
 ```
 /Users/kc244/enigma_chr_data
@@ -155,5 +128,7 @@ Here is the list of files to share
             ├── subject_02.html
             └── subject_02.pdf
 ```
+
+
 
 
