@@ -28,10 +28,10 @@ email: kevincho@bwh.harvard.edu
 This container uses following softwares. Please cite them if you use this container in your study.
 
 - [`dcm2niix`](https://github.com/rordenlab/dcm2niix)
+- [CNN based diffusion MRI brain segmentation tool](https://github.com/pnlbwh/CNN-Diffusion-MRIBrain-Segmentation)
 - [FSL (and FSL unring)](https://fsl.fmrib.ox.ac.uk/)
 - [ANTs](https://github.com/ANTsX/ANTs)
 - [PNL TBSS](https://github.com/pnlbwh/TBSS)
-- [CNN based diffusion MRI brain segmentation tool](https://github.com/pnlbwh/CNN-Diffusion-MRIBrain-Segmentation)
 - [`objPipe`](https://github.com/kcho/objPipe)
 - [`eddy-squeeze`](https://github.com/pnlbwh/eddy-squeeze)
 - [`nifti-snapshot`](https://github.com/pnlbwh/nifti-snapshot)
