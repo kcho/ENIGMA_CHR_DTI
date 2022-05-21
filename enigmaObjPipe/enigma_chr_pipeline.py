@@ -227,7 +227,7 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         self.tbss_all_modalities = ['dti_FA', 'dti_RD', 'dti_MD', 'dti_L1']
         self.tbss_all_modalities_str = ['FA', 'RD', 'MD', 'AD']
         self.create_tbss_all_csv(self.tbss_all_out_dir)
-        if len([x for x in subject.subject_classes
+        if len([x for x in self.subject_classes
                 if x.preproc_completed]) > 1:
             self.execute_tbss(force)
         else:
