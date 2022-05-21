@@ -257,7 +257,7 @@ class DwiToolsStudy(object):
         self.pass_eddy = self.count_subject('diff_ep_out')
         self.pass_eddy_bvec = self.count_subject('diff_ep_bvec')
         self.pass_dtifit = self.count_subject('dti_FA')
-        self.completed_preproc = sum([x for x in self.subject_classes
+        self.completed_preproc = len([x for x in self.subject_classes
                                       if x.preproc_completed])
 
         self.started_tbss = self.tbss_stats_dir.is_dir()
