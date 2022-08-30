@@ -53,6 +53,13 @@ In terminal or power-shell, type
 $ docker pull kcho/enigma-chr-pipeline
 ```
 
+
+If your server only supports docker,
+```
+$ singularity build enigma-chr-pipeline.simg docker://kcho/enigma-chr-pipeline
+```
+
+
 3. [Test the pipeline](how_to_test_pipeline.md)
 
 
@@ -77,17 +84,27 @@ $ docker pull kcho/enigma-chr-pipeline
 Once you have your dicom files arranged for each subject, run following command
 
 ```
-enigma_chr_dir=/Users/kc244/enigma_chr_data   # set this to your data location
-docker run -it -v ${enigma_chr_dir}:/data kcho/enigma-chr-pipeline
+$ enigma_chr_dir=/Users/kc244/enigma_chr_data   # set this to your data location
+$ docker run -it -v ${enigma_chr_dir}:/data kcho/enigma-chr-pipeline
+```
+
+For singularity,
+```
+$ enigma_chr_dir=/Users/kc244/enigma_chr_data   # set this to your data location
+$ singularity run -e -B ${enigma_chr_dir}:/data:rw enigma-chr-pipeline.simg
 ```
 
 
 ## Sharing outputs to other teams
 
 Run the code below to collect and compress the files to share.
-
 ```
-docker run -it -v ${enigma_chr_dir}:/data kcho/enigma-chr-pipeline collect_outputs.py
+$ docker run -it -v ${enigma_chr_dir}:/data kcho/enigma-chr-pipeline collect_outputs.py
+```
+
+For singularity,
+```
+$ singularity run -e -B ${enigma_chr_dir}:/data:rw enigma-chr-pipeline.simg collect_outputs.py
 ```
 
 Here is the list of files collected by `collect_outputs.py`
@@ -130,5 +147,15 @@ Here is the list of files collected by `collect_outputs.py`
 ```
 
 
+## Enter into the image shell
 
+```
+$ enigma_chr_dir=/Users/kc244/enigma_chr_data   # set this to your data location
+$ docker run -it \
+    -v ${enigma_chr_dir}:/data \
+    enigma_chr_pipeline /bin/bash
 
+# for singularity
+$ singularity shell -e -B ${enigma_chr_dir}:/data \
+    enigma_chr_pipeline.simg /bin/bash
+```
