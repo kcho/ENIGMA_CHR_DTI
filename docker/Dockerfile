@@ -39,6 +39,29 @@ RUN apt-get update -qq \
            wget \
     && rm -rf /var/lib/apt/lists/*
 
+# Installing freesurfer
+COPY docker/files/freesurfer7.2-exclude.txt /usr/local/etc/freesurfer7.2-exclude.txt
+RUN curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.2.0/freesurfer-linux-ubuntu18_amd64-7.2.0.tar.gz \
+￼    | tar zxv --no-same-owner -C /opt
+
+# Simulate SetUpFreeSurfer.sh
+ENV FSL_DIR="/opt/fsl-6.0.4" \
+    OS="Linux" \
+    FS_OVERRIDE=0 \
+    FIX_VERTEX_AREA="" \
+    FSF_OUTPUT_FORMAT="nii.gz" \
+    FREESURFER_HOME="/opt/freesurfer"
+ENV SUBJECTS_DIR="$FREESURFER_HOME/subjects" \
+    FUNCTIONALS_DIR="$FREESURFER_HOME/sessions" \
+    MNI_DIR="$FREESURFER_HOME/mni" \
+    LOCAL_DIR="$FREESURFER_HOME/local" \
+    MINC_BIN_DIR="$FREESURFER_HOME/mni/bin" \
+    MINC_LIB_DIR="$FREESURFER_HOME/mni/lib" \
+    MNI_DATAPATH="$FREESURFER_HOME/mni/data"
+ENV PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
+    MNI_PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
+    PATH="$FREESURFER_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH"
+
 RUN echo "Downloading FSL ..." \
     && mkdir -p /opt/fsl-6.0.4 \
     && curl -fL \
