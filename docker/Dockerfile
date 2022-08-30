@@ -70,7 +70,8 @@ RUN echo "Installing FSL conda environment ..." \
     && bash /opt/fsl-6.0.4/etc/fslconf/fslpython_install.sh -f /opt/fsl-6.0.4
 
 # Installing ANTS
-RUN apt-get update \
+RUN echo "Installing ANTS ..." \
+    && apt-get update \
     && apt-get install -y --no-install-recommends \
                     apt-transport-https \
                     build-essential \
