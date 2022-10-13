@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     project_root = '/data'
     enigmaChrStudy = EnigmaChrStudy(project_root)
-    if len(enigmaChrStudy.subjects) > 1:
+    if len(enigmaChrStudy.subjects) >= 1:
         enigmaChrStudy.project_pipeline(test=args.test)
     else:
         print('Please check if there are dicom directories under /data')
