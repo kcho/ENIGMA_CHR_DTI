@@ -58,7 +58,7 @@ class DicomTools(object):
         if not self.nifti_dir.is_dir() or not self.diff_raw_dwi.is_file():
             command = f'{self.dcm2niix} \
                     -o {self.nifti_dir} \
-                    -f {self.subject_name} \
+                    -f {self.subject_name}_%d \
                     -z y \
                     {self.dicom_dir}'
             self.nifti_dir.mkdir(exist_ok=True, parents=True)
