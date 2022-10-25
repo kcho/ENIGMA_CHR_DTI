@@ -224,7 +224,7 @@ WORKDIR /data
 
 RUN apt-get install -y x11-apps
 RUN pwd
-RUN cd /opt/ENIGMA_CHR_DTI && git pull && git checkout kcho/penn
+RUN cd /opt/ENIGMA_CHR_DTI && git pull && git checkout kcho/penn && git pull
 
 CMD xvfb-run python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -p
 
