@@ -2,7 +2,6 @@
 
 import argparse
 import sys
-sys.path.append('/Users/kc244/ENIGMA_CHR_DTI')
 from enigmaObjPipe.enigma_chr_pipeline import EnigmaChrStudy
 from enigmaObjPipe.penn_pipeline import EnigmaChrStudyPenn
 
