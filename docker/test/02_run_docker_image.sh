@@ -26,4 +26,4 @@ cp -r ${test_data_dir}/sourcedata/subject_01 \
 
 docker run -it \
     -v ${test_data_dir}:/data \
-    enigma-chr-pipeline
+    enigma_chr_pipeline
