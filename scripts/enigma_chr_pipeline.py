@@ -4,6 +4,7 @@ import argparse
 import sys
 from enigmaObjPipe.enigma_chr_pipeline import EnigmaChrStudy
 
+
 def parse_args(argv):
     '''Parse inputs coming from the terminal'''
     argparser = argparse.ArgumentParser(
@@ -21,7 +22,8 @@ if __name__ == '__main__':
 
     project_root = '/data'
     enigmaChrStudy = EnigmaChrStudy(project_root)
-    if len(enigmaChrStudy.subjects) > 1:
+
+    if len(enigmaChrStudy.subjects) >= 1:
         enigmaChrStudy.project_pipeline(test=args.test)
     else:
         print('Please check if there are dicom directories under /data')

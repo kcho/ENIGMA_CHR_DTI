@@ -12,7 +12,7 @@ class StudyTBSS(object):
 
     def create_tbss_all_csv(self, tbss_all_out_dir: str):
         self.tbss_all_out_dir = Path(tbss_all_out_dir)
-        self.tbss_all_out_dir.mkdir(exist_ok=True)
+        self.tbss_all_out_dir.mkdir(exist_ok=True, parents=True)
         self.log_loc = self.tbss_all_out_dir / 'log.txt'
         # self.start_logging('TBSS')
 

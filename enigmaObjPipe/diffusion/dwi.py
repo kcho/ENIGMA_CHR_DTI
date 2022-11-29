@@ -176,6 +176,7 @@ class DwiPipe(object):
         self.nifti_header_series['bvec arr'] = bvec_arr.shape
         assert img.shape[-1] in bvec_arr.shape, 'bvec does not match dwi'
 
+
     def eddy_squeeze(self, force: bool = False):
         eddyRun = EddyRun(self.diff_ep)
 
@@ -268,3 +269,32 @@ class DwiToolsStudy(object):
         for title, dir_path in {'TBSS': self.tbss_all_out_dir}.items():
             tree_out_text = os.popen(f'tree {dir_path}').read()
             self.tree_out[title] = tree_out_text
+
+def merge_dwis(dwi1:Paths, bval1:Paths, bvec1:Paths, 
+               dwi2:Paths, bval2:Paths, bvec2:Paths,
+               ndwi:Paths, nbval:Paths, nbvec:Paths) -> None:
+    '''Save the dwi, bvec and bal with on the specified shells'''
+
+    # load bval
+    bval_arr_1 = np.loadtxt(str(bval1))
+    bval_arr_2 = np.loadtxt(str(bval2))
+
+    # load bvec
+    bvec_arr_1 = np.loadtxt(str(bvec1))
+    bvec_arr_2 = np.loadtxt(str(bvec2))
+
+    # load dwi
+    dwi_img_1 = nb.load(str(dwi1))
+    dwi_data_1 = dwi_img_1.get_fdata()
+
+    dwi_img_2 = nb.load(str(dwi2))
+    dwi_data_2 = dwi_img_2.get_fdata()
+
+    # new merged arrays
+    new_dwi_data = np.concatenate([dwi_data_1, dwi_data_2], axis=3)
+    new_bval = np.concatenate([bval_arr_1, bval_arr_2])
+    new_bvec = np.concatenate([bvec_arr_1, bvec_arr_2], axis=1)
+
+    nb.Nifti1Image(new_dwi_data, affine=dwi_img_1.affine).to_filename(str(ndwi))
+    np.savetxt(nbval, new_bval, fmt='%.1f')
+    np.savetxt(nbvec, new_bvec, fmt='%.6f')

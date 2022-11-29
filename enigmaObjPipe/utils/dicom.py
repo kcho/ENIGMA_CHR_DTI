@@ -1,6 +1,7 @@
 import pydicom
 import os
 import pandas as pd
+from pathlib import Path
 import shutil
 
 class DicomTools(object):
@@ -10,7 +11,7 @@ class DicomTools(object):
         for root, dirs, files in os.walk(self.dicom_dir):
             for file in [x for x in files if not x.startswith('.')]:
                 dicom = pydicom.read_file(
-                        str(self.dicom_dir / file),
+                        Path(root) / file,
                         force=True)
 
                 list_of_items_to_get = [
