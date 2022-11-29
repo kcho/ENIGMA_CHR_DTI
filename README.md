@@ -1,15 +1,11 @@
 # ENIGMA CHR DTI pipeline
 
-ENIGMA CHR DTI repository
-
-github: @kcho
-
-email: kevincho@bwh.harvard.edu
-
+Kevin Cho and Yoobin Kwak
+kevincho@bwh.harvard.edu
+yoobinkwak@gmail.com
 
 
 ## Contents
-
 - Introduction
 - Citation
 - Installation
@@ -18,9 +14,20 @@ email: kevincho@bwh.harvard.edu
 - Sharing outputs to other teams
 
 
-
 ## Introduction
 
+ENIGMA CHR DTI pipeline is an automated toolbox for analyzing diffusion weighted imaging (DWI) data developed for ENIGMA-CHR DTI project. The pipeline expects dicom files of a single DWI scan arranged in a required structure (decribed in "Arranging data for the pipeline").
+
+The dicom files will be converted to a Nifti file, bval, and bvec file along with the BIDS sidecar json file. Then the following steps will be applied to each subject data.
+- Gibbs unring (FSL)
+- FSL Eddy (6.0.4)
+- Tensor decomposition to create fractional anisotropy (FA), axial diffusivity (AD), mean diffusivity (MD), and radial diffusivity (RD) maps.
+- Skeletonization of the FA, AD, MD and RD maps using PNL-TBSS.
+- Extract mean diffusion measures in the major JHU bundles.
+
+This toolbox is deployed in a container, so users would need to have either Docker or Singularity on their server / computer.
+
+Please note, since this pipeline is developed specifically for ENIGMA-CHR project, it does not support EPI distortion correction using reverse-encoding maps or field maps. If your data for ENIGMA-CHR project has multiple DWI series, blip-up / blip-down, fieldmaps, or other reverse-encoding diffusion scans, please reach out to the coordinating team.
 
 
 ## Citation
@@ -70,10 +77,14 @@ $ singularity build enigma-chr-pipeline.simg docker://kcho/enigma-chr-pipeline
 └── sourcedata
     ├── subject_01
     │   ├── MR.1.3.12.2.1107.5.2.43.166239.2022042610335278017249630.dcm
+    │   ├── MR.1.3.12.2.1107.5.2.43.166239.2022042610335278017249631.dcm
     │   ├── ...
     │   └── MR.1.3.12.2.1107.5.2.43.166239.2022042610431388254021154.dcm
     ├── subject_02
-    │   └── ...
+    │   ├── MR.1.3.12.2.1107.5.2.43.166239.2022042610335278017239630.dcm
+    │   ├── MR.1.3.12.2.1107.5.2.43.166239.2022042610335278011723631.dcm
+    │   ├── ...
+    │   └── MR.1.3.12.2.1107.5.2.43.166239.202204261043138825403154.dcm
     └── subject_XX
 ```
 
