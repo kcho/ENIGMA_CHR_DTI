@@ -52,20 +52,6 @@ class DicomTools(object):
             self.run(command)
 
 
-    def convert_dicom_into_bids_for_penn(self, force: bool = False):
-        if force:
-            shutil.rmtree(self.nifti_dir)
-
-        if not self.nifti_dir.is_dir() or not self.diff_raw_dwi.is_file():
-            command = f'{self.dcm2niix} \
-                    -o {self.nifti_dir} \
-                    -f {self.subject_name}_%d \
-                    -z y \
-                    {self.dicom_dir}'
-            self.nifti_dir.mkdir(exist_ok=True, parents=True)
-            self.run(command)
-
-
 class DicomToolsStudy(object):
     def dicom_header_summary(self):
         self.dicom_df = pd.DataFrame(
