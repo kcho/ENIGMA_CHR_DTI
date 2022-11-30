@@ -18,23 +18,24 @@ yoobinkwak@gmail.com
 
 ## Introduction
 
-ENIGMA CHR DTI pipeline is an automated toolbox for analyzing diffusion weighted imaging (DWI) data developed for ENIGMA-CHR DTI project. The pipeline expects dicom files of a single DWI scan arranged in a required structure (decribed in "Arranging data for the pipeline").
+ENIGMA CHR DTI pipeline is a toolbox for analyzing diffusion weighted imaging (DWI) data developed for ENIGMA-CHR DTI project. The pipeline expects dicom files of a single DWI scan arranged in a required structure (decribed in "Arranging data for the pipeline") and automatically processes available data.
 
 The dicom files will be converted to a Nifti file, bval, and bvec file along with the BIDS sidecar json file. Then the following steps will be applied to each subject data.
 - Gibbs unring (FSL)
 - FSL Eddy (6.0.4)
 - Tensor decomposition to create fractional anisotropy (FA), axial diffusivity (AD), mean diffusivity (MD), and radial diffusivity (RD) maps.
 - Skeletonization of the FA, AD, MD and RD maps using PNL-TBSS.
-- Extract mean diffusion measures in the major JHU bundles.
+- Extraction of mean diffusion measures in the major JHU bundles.
 
-This toolbox is deployed in a container, so users would need to have either Docker or Singularity on their server / computer.
+The toolbox is deployed in a container, so as long as either Docker or Singularity is installed on the server, the toolbox should be functional regardless of the operating system. 
 
-Please note, since this pipeline is developed specifically for ENIGMA-CHR project, it does not support EPI distortion correction using reverse-encoding maps or field maps. If your data for ENIGMA-CHR project has multiple DWI series, blip-up / blip-down, fieldmaps, or other reverse-encoding diffusion scans, please reach out to the coordinating team.
+
+Please note the pipeline does not support Apple Mac with M1 Chips yet, due to an issue with tensorflow installation on M1 Chip machines. Also, since this pipeline is specifically developed for ENIGMA-CHR DTI project, it does not support EPI distortion correction using reverse-encoding maps or field maps. If your data for ENIGMA-CHR project has multiple DWI series, blip-up / blip-down, fieldmaps, or other reverse-encoding diffusion scans, please reach out to the coordinating team.
 
 
 ## Citation
 
-This container uses following softwares. Please cite them if you use this container in your study.
+This toolbox uses the following softwares. Please cite them if you use this pipeline in your study.
 
 - [`dcm2niix`](https://github.com/rordenlab/dcm2niix)
 - [CNN based diffusion MRI brain segmentation tool](https://github.com/pnlbwh/CNN-Diffusion-MRIBrain-Segmentation)
@@ -49,10 +50,11 @@ This container uses following softwares. Please cite them if you use this contai
 
 ## Installation
 
+### with Docker
 1. Install and configure Docker Desktop
 
 - [Download Docker Desktop](https://www.docker.com/products/docker-desktop/)
-    - with at least 4 cores (8 cores preferably) and 4 GB RAM (8 GB preferably)
+    - with at least 4 cores (12 cores preferably) and 4 GB RAM (16 GB preferably)
 
 
 2. Download ENIGMA CHR DTI docker image.
@@ -63,7 +65,7 @@ $ docker pull kcho/enigma-chr-pipeline
 ```
 
 
-If your server only supports docker,
+### with Singularity
 ```
 $ singularity build enigma-chr-pipeline.simg docker://kcho/enigma-chr-pipeline
 ```
@@ -106,6 +108,8 @@ For singularity,
 $ enigma_chr_dir=/Users/kc244/enigma_chr_data   # set this to your data location
 $ singularity run -e -B ${enigma_chr_dir}:/data:rw enigma-chr-pipeline.simg
 ```
+
+**The pipeline is expected to take about 2~3 hours to process a single subject data.**
 
 
 ## Sharing outputs to other teams
