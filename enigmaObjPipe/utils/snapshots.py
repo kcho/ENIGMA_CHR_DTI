@@ -13,15 +13,15 @@ class Snapshot(object):
                 f"(1st B0 volume={self.b0_index[0]})"
 
         if force or not output_file_loc.is_file():
-            _ = nifti_snapshot.SimpleFigure(
-                    image_files=[input_file],
-                    title=title,
-                    make_transparent_zero=True,
-                    cbar_width=0.5,
-                    cbar_title=cbar_title,
-                    output_file=output_file_loc,
-                    volumes=[self.b0_index[0]],
-                    percentile=intensity_percentile)
+            nifti_snapshot.SimpleFigure(
+                image_files=[input_file],
+                title=title,
+                make_transparent_zero=True,
+                cbar_width=0.5,
+                cbar_title=cbar_title,
+                output_file=output_file_loc,
+                volumes=[self.b0_index[0]],
+                percentile=intensity_percentile)
 
     def snapshot_tbss(self, input_file, label,
                       cbar_title='intensity',
@@ -83,15 +83,15 @@ class Snapshot(object):
                 f"(1st B0 volume={self.b0_index[0]})"
 
         if force or not output_file_loc.is_file():
-            _ = nifti_snapshot.SimpleFigure(
-                    image_files=[input_file_1, input_file_2],
-                    title=title,
-                    make_transparent_zero=False,
-                    cmap_list=['viridis'],
-                    cbar_width=0.5,
-                    cbar_title=cbar_title,
-                    output_file=output_file_loc,
-                    volumes=[self.b0_index[0]],
-                    percentile=intensity_percentile,
-                    get_diff=True)
+            nifti_snapshot.SimpleFigure(
+                image_files=[input_file_1, input_file_2],
+                title=title,
+                make_transparent_zero=False,
+                cmap_list=['viridis'],
+                cbar_width=0.5,
+                cbar_title=cbar_title,
+                output_file=output_file_loc,
+                volumes=[self.b0_index[0]],
+                percentile=intensity_percentile,
+                get_diff=True)
 

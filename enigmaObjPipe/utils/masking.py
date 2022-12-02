@@ -69,7 +69,7 @@ class MaskingPipe(object):
         data = img.get_fdata()
         _, mask = median_otsu(data, median_radius=2, numpass=1)
 
-        nb.Nifti2Image(mask.astype(np.float32),
+        nb.Nifti1Image(mask.astype(np.float32),
                        affine=img.affine).to_filename(output)
 
 
