@@ -11,6 +11,10 @@ def parse_args(argv):
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description='ENIGMA CHR DTI pipeline')
 
+    argparser.add_argument("--nifti_input", "-ni", action='store_true',
+                           help='Input data is nifti files rather than'
+                                'dicom files')
+
     argparser.add_argument("--test", "-test", action='store_true',
                            help='Test run')
 
@@ -20,8 +24,13 @@ def parse_args(argv):
 if __name__ == '__main__':
     args = parse_args(sys.argv[1:])
 
-    project_root = '/data'
-    enigmaChrStudy = EnigmaChrStudy(project_root)
+    project_root = '/data'  # pipeline uses /data directory
+
+    if args.nifti_input:
+        enigmaChrStudy = EnigmaChrStudy(project_root,
+                                        raw_data_type='nifti')
+    else:
+        enigmaChrStudy = EnigmaChrStudy(project_root)
 
     if len(enigmaChrStudy.subjects) >= 1:
         enigmaChrStudy.project_pipeline(test=args.test)

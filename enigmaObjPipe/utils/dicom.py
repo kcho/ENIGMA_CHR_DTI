@@ -7,24 +7,20 @@ import shutil
 class DicomTools(object):
     def check_dicom_info(self, force: bool = False):
         '''Extract information from dicom header and store it in a dataframe'''
+        list_of_items_to_get = [
+            'AcquisitionDate', 'SeriesDescription',
+            'ImageType', 'AcquisitionMatrix',
+            'DeviceSerialNumber', 'EchoTime', 'FlipAngle',
+            'InPlanePhaseEncodingDirection',
+            'MagneticFieldStrength', 'Manufacturer',
+            'ManufacturerModelName', 'ProtocolName',
+            'RepetitionTime', 'SequenceName', 'SliceThickness',
+            'SoftwareVersions', 'SpacingBetweenSlices'
+        ]
 
         for root, dirs, files in os.walk(self.dicom_dir):
             for file in [x for x in files if not x.startswith('.')]:
-                dicom = pydicom.read_file(
-                        Path(root) / file,
-                        force=True)
-
-                list_of_items_to_get = [
-                    'AcquisitionDate', 'SeriesDescription',
-                    'ImageType', 'AcquisitionMatrix',
-                    'DeviceSerialNumber', 'EchoTime', 'FlipAngle',
-                    'InPlanePhaseEncodingDirection',
-                    'MagneticFieldStrength', 'Manufacturer',
-                    'ManufacturerModelName', 'ProtocolName',
-                    'RepetitionTime', 'SequenceName', 'SliceThickness',
-                    'SoftwareVersions', 'SpacingBetweenSlices'
-                    ]
-
+                dicom = pydicom.read_file(Path(root) / file, force=True)
                 self.dicom_header_series = pd.Series({
                     'subject': self.subject_name,
                     })
@@ -36,6 +32,23 @@ class DicomTools(object):
                         self.dicom_header_series[i] = 'missing'
 
                 return
+
+    def no_dicom_info(self, force: bool = False):
+        list_of_items_to_get = [
+            'AcquisitionDate', 'SeriesDescription',
+            'ImageType', 'AcquisitionMatrix',
+            'DeviceSerialNumber', 'EchoTime', 'FlipAngle',
+            'InPlanePhaseEncodingDirection',
+            'MagneticFieldStrength', 'Manufacturer',
+            'ManufacturerModelName', 'ProtocolName',
+            'RepetitionTime', 'SequenceName', 'SliceThickness',
+            'SoftwareVersions', 'SpacingBetweenSlices'
+        ]
+        self.dicom_header_series = pd.Series({
+            'subject': self.subject_name,
+            })
+        for i in list_of_items_to_get:
+            self.dicom_header_series[i] = 'no dicom input'
 
 
     def convert_dicom_into_bids(self, force: bool = False):

@@ -27,10 +27,31 @@ The dicom files will be converted to a Nifti file, bval, and bvec file along wit
 - Skeletonization of the FA, AD, MD and RD maps using PNL-TBSS.
 - Extraction of mean diffusion measures in the major JHU bundles.
 
+To increase the homogeneity of the diffusion acquisition parameters within the site, the pipeline curates the following dicom tags from all data, and highlight in the report if there is any deviation in dicom tags within a site.
+
+- SeriesDescription
+- ImageType
+- AcquisitionMatrix
+- DeviceSerialNumber
+- EchoTime
+- FlipAngle
+- InPlanePhaseEncodingDirection
+- MagneticFieldStrength
+- Manufacturer
+- ManufacturerModelName
+- ProtocolName
+- RepetitionTime
+- SequenceName
+- SliceThickness
+- SoftwareVersions
+- SpacingBetweenSlices
+
+Although it's recommended to provide dicom data as the input to the pipeline, you can also provide diffusion files in the nifti format if your DWI data requires a specific dicom to nifti conversion or if the dicom files not available by some reason. You would need to provide DWI nifti file, bvector file, bvalue file in a structure that the pipeline expects. Pleaes make sure you are providing the raw nifti file without any preprocessing. If any of the three files is missing, the pipeline will raise an error. (See `Arranging data for the pipeline` section.) Please let the study coordinator know your situation, and the study coordinate will guide you.
+
 The toolbox is deployed in a container, so as long as either Docker or Singularity is installed on the server, the toolbox should be functional regardless of the operating system. 
-
-
 Please note the pipeline does not support Apple Mac with M1 Chips yet, due to an issue with tensorflow installation on M1 Chip machines. Also, since this pipeline is specifically developed for ENIGMA-CHR DTI project, it does not support EPI distortion correction using reverse-encoding maps or field maps. If your data for ENIGMA-CHR project has multiple DWI series, blip-up / blip-down, fieldmaps, or other reverse-encoding diffusion scans, please reach out to the coordinating team.
+
+Please let the study coordinator know if you don't have powerful enough servers to process your diffusion data. The study coordinator will arrange a cloud server for you to run the pipeline.
 
 
 ## Citation
@@ -76,6 +97,8 @@ $ singularity build enigma-chr-pipeline.simg docker://kcho/enigma-chr-pipeline
 
 ## Arranging data for the pipeline
 
+### If you are providing dicom files to the pipeline
+
 ```
 /Users/kc244/enigma_chr_data  <-  it could be somewhere else
 └── sourcedata
@@ -92,6 +115,23 @@ $ singularity build enigma-chr-pipeline.simg docker://kcho/enigma-chr-pipeline
     └── subject_XX
 ```
 
+
+### If you are providing nifti files to the pipeline as the raw input
+
+```
+/Users/kc244/enigma_chr_data  <-  it could be somewhere else
+└── rawdata
+    ├── subject_01
+    │   ├── subject_01.nii.gz
+    │   ├── subject_01.bvec
+    │   └── subject_01.bval
+    ├── subject_02
+    │   ├── subject_02.nii.gz
+    │   ├── subject_02.bvec
+    │   └── subject_02.bval
+    ├── ...
+    └── subject_XX
+```
 
 
 ## Running the ENIGMA CHR DTI Pipeline
@@ -110,6 +150,20 @@ $ singularity run -e -B ${enigma_chr_dir}:/data:rw enigma-chr-pipeline.simg
 ```
 
 **The pipeline is expected to take about 2~3 hours to process a single subject data.**
+
+
+### If you are providing nifti data to the pipeline, follow the steps below.
+
+```
+$ enigma_chr_dir=/Users/kc244/enigma_chr_data   # set this to your data location
+$ docker run -it \
+    -v ${enigma_chr_dir}:/data \
+    enigma_chr_pipeline xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py --nifti_input
+
+# for singularity
+$ singularity shell -e -B ${enigma_chr_dir}:/data \
+    enigma_chr_pipeline.simg xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py --nifti_input
+```
 
 
 ## Sharing outputs to other teams

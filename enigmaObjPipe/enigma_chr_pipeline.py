@@ -137,14 +137,116 @@ class EnigmaChrSubjectDicomDir(
         self.preproc_completed = True
 
 
+class EnigmaChrSubjectNiftiDir(EnigmaChrSubjectDicomDir):
+    def __init__(self, nifti_dir: Path):
+        '''Enigma subject with CHR rawdata input
+
+        Key argument:
+            nifti_dir: root directory of nifti files for a subject, str.
+
+        Required files:
+            Diffusion nifti file, bvec file, and bval file with the matching
+            prefix are required for the pipeline to detec the files.
+
+        Expected data structure:
+            /home/kevin/enigma_root_dir
+            └── rawdata
+                ├── subject_01 <- `nifti_dir`
+                │   ├── subject_01.nii.gz
+                │   ├── subject_01.bvec
+                │   └── subject_01.bval
+                ├── subject_02
+                │   ├── subject_02.nii.gz
+                │   ├── subject_02.bvec
+                │   └── subject_02.bval
+                ├── ...
+                └── subject_XX
+
+        How to use this class:
+            >> import EnigmaChrProject
+            >> nifti_dir = '/home/kevin/enigma_root_dir/rawdata/subject_01'
+            >> enigmaChrSubject = EnigmaChrSubjectNiftiDir(nifti_dir)
+            >> enigmaChrSubject.subject_pipeline()
+        '''
+        sourcedata_root = Path(nifti_dir).parent.parent / 'sourcedata'
+        subject_name = Path(nifti_dir).name
+        dicom_dir_missing = sourcedata_root / subject_name
+
+        EnigmaChrSubjectDicomDir.__init__(self, dicom_dir_missing)
+
+    def subject_pipeline(self, force: bool = False, test: bool = False):
+        '''Subject-wise pipeline'''
+        # register 'no dicom input' to self.dicom_header_series attr
+        self.no_dicom_info(force)
+
+        # 3. check if the conversion worked correctly
+        self.check_diff_nifti_info(force)
+        self.snapshot_first_b0(self.diff_raw_dwi, 'Raw DWI', force)
+                      
+        # 4. Diffusion preprocessing
+        # 4a. gibbs unring
+        print('Gibbs Unring')
+        self.run_gibbs_unring(self.diff_raw_dwi, self.diff_dwi_unring, force)
+        self.snapshot_first_b0(self.diff_dwi_unring, 'Unring DWI', force)
+        self.snapshot_diff_first_b0(self.diff_dwi_unring, self.diff_raw_dwi,
+                                    'Unring DWI', 'Raw DWI', force)
+
+
+        # 4b. topup if site have reverse encoding maps
+        # self.topup_preparation_ampscz(force)
+
+        # 4c. run Eddy
+        print('Running Eddy - may take 1~2 hours')
+        self.eddy(force, test)
+        self.snapshot_first_b0(self.diff_mask, 'mask', force)
+        self.snapshot_first_b0(self.diff_ep.with_suffix('.nii.gz'),
+                               'Eddy DWI', force)
+        self.snapshot_diff_first_b0(self.diff_ep.with_suffix('.nii.gz'),
+                                    self.diff_dwi_unring,
+                                    'Eddy output', 'Unring DWI', force)
+
+        # 5. Eddy QC
+        self.eddy_squeeze(force)
+        self.eddyRun.df_motion.index = [self.subject_name]
+
+        # 6. Tensor fit & decomp
+        print('Tensor fit')
+        self.fsl_tensor_fit(force)
+
+        # 7. Capture maps
+        print('Snapshots')
+        self.snapshot_first_b0(self.dti_FA, 'FA', force)
+        self.snapshot_first_b0(self.dti_MD, 'MD', force)
+        self.snapshot_first_b0(self.dti_RD, 'RD', force)
+        self.snapshot_first_b0(self.dti_L1, 'AD', force)
+
+        self.tree_out = {}
+        for title, dir_path in {'Raw Nifti': self.nifti_dir,
+                                'Diffusion preproc': self.diff_dir,
+                                'Eddy-squeeze': self.eddy_qc_dir,
+                                'Nifti snapshots': self.screen_shot_dir,
+                                'Web summary': self.web_summary_dir}.items():
+            tree_out_text = os.popen(f'tree {dir_path}').read()
+            self.tree_out[title] = tree_out_text
+
+        # # 8. HTML summary
+        create_subject_summary(self, self.web_summary_file)
+
+        self.preproc_completed = True
+
+
 
 class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         DicomToolsStudy, DwiToolsStudy):
-    def __init__(self, root_dir: Path, site: str = None):
+    def __init__(self, root_dir: Path, site: str = None,
+                 raw_data_type: str = 'dicom'):
         '''ENIGMA CHR Project directory object
 
         Key argument:
-            root_dir: Root of the ENIGMA CHR data directory
+            root_dir: Root of the ENIGMA CHR data directory, str or Path.
+            site: Name of the study site, str.
+            raw_data_type: Type of the raw data, either 'dicom' or 'nifti'.
+                           'dicom' by default.
 
         Expected data structure:
             /home/kevin/enigma_root_dir  <- `root_dir`
@@ -171,22 +273,45 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
 
         self.root_dir = Path(root_dir)
         self.source_dir = self.root_dir / 'sourcedata'
-        self.subjects = list(sorted([x for x in self.source_dir.glob('*')
-            if not x.name.startswith('.')]))
-        
-        # make sure there are at least one subject
-        if len(self.subjects) < 1:
-            print('Please make sure your data is arranged correctly')
-            print("1. Please check if you have 'sourcedata' directory under "
-                  "your root data directory")
-            print("2. Please check if you have subject directories under "
-                  "'sourcedata' directory")
-            print("3. Please check if you have dicoms under the subject "
-                  "directories.")
-            sys.exit('Exiting without running the pipeline')
+        self.sourcedata_root_check = self.source_dir.is_dir()
+        self.rawdata_root = self.root_dir / 'rawdata'
+        self.rawdata_root_check = self.rawdata_root.is_dir()
 
-        self.subject_classes = [EnigmaChrSubjectDicomDir(x) for x
-                                in self.subjects]
+        if raw_data_type == 'dicom':
+            self.subjects = list(sorted([x for x in self.source_dir.glob('*')
+                if not x.name.startswith('.')]))
+        
+            # make sure there are at least one subject
+            if len(self.subjects) < 1:
+                print('-'*80)
+                print('No dicom directories are detected')
+                if not self.sourcedata_root_check():
+                    print("Your data structure does not have 'sourcedata' "
+                          "directory")
+                    print("Please see the documentation for how to structure "
+                          "the input data")
+                sys.exit('Exiting without running the pipeline')
+
+            self.subject_classes = [EnigmaChrSubjectDicomDir(x) for x
+                                    in self.subjects]
+
+        else:  # Nifti input
+            self.subjects = list(sorted([x for x in self.rawdata_root.glob('*')
+                if not x.name.startswith('.')]))
+
+            # make sure there are at least one subject
+            if len(self.subjects) < 1:
+                print('-'*80)
+                print('No nifti directories are detected')
+                if not self.rawdata_root_check():
+                    print("Your data structure does not have 'rawdata' "
+                          "directory")
+                    print("Please see the documentation for how to structure "
+                          "the input data")
+                sys.exit('Exiting without running the pipeline')
+
+            self.subject_classes = [EnigmaChrSubjectNiftiDir(x) for x
+                                    in self.subjects]
 
         # tbss
         self.derivatives_root = self.root_dir / 'derivatives'
