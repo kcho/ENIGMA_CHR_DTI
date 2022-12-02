@@ -158,11 +158,11 @@ $ singularity run -e -B ${enigma_chr_dir}:/data:rw enigma-chr-pipeline.simg
 $ enigma_chr_dir=/Users/kc244/enigma_chr_data   # set this to your data location
 $ docker run -it \
     -v ${enigma_chr_dir}:/data \
-    enigma_chr_pipeline xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py --nifti_input
+    enigma_chr_pipeline xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data --nifti_input
 
 # for singularity
 $ singularity shell -e -B ${enigma_chr_dir}:/data \
-    enigma_chr_pipeline.simg xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py --nifti_input
+    enigma_chr_pipeline.simg xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data --nifti_input
 ```
 
 

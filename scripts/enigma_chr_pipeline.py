@@ -11,6 +11,14 @@ def parse_args(argv):
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description='ENIGMA CHR DTI pipeline')
 
+    argparser.add_argument("--bids_root", "-b",
+                           required=True,
+                           help='BIDS root of the data')
+
+    argparser.add_argument("--site", "-s",
+                           default=None,
+                           help='Name of the study site')
+
     argparser.add_argument("--nifti_input", "-ni", action='store_true',
                            help='Input data is nifti files rather than'
                                 'dicom files')
@@ -21,20 +29,19 @@ def parse_args(argv):
     args = argparser.parse_args(argv)
     return args
 
+
 if __name__ == '__main__':
     args = parse_args(sys.argv[1:])
 
-    project_root = '/data'  # pipeline uses /data directory
-
     if args.nifti_input:
-        enigmaChrStudy = EnigmaChrStudy(project_root,
+        enigmaChrStudy = EnigmaChrStudy(args.bids_root,
+                                        site=args.site,
                                         raw_data_type='nifti')
     else:
-        enigmaChrStudy = EnigmaChrStudy(project_root)
+        enigmaChrStudy = EnigmaChrStudy(args.bids_root,
+                                        site=args.site)
 
     if len(enigmaChrStudy.subjects) >= 1:
         enigmaChrStudy.project_pipeline(test=args.test)
     else:
-        print('Please check if there are dicom directories under /data')
-        print('(the input to -v option in the docker run command could be '
-               'wrong)')
+        print(f'No data detected under {args.bids_root}')
