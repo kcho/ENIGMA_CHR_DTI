@@ -139,19 +139,19 @@ class EnigmaChrSubjectDicomDir(
 
 class EnigmaChrSubjectNiftiDir(EnigmaChrSubjectDicomDir):
     def __init__(self, nifti_dir: Path):
-        '''Enigma subject with CHR rawdata input
+        '''Enigma subject with nifti raw data input
 
         Key argument:
             nifti_dir: root directory of nifti files for a subject, str.
 
         Required files:
             Diffusion nifti file, bvec file, and bval file with the matching
-            prefix are required for the pipeline to detec the files.
+            prefix are required for the pipeline to detect the files.
 
         Expected data structure:
             /home/kevin/enigma_root_dir
             └── rawdata
-                ├── subject_01 <- `nifti_dir`
+                ├── subject_01  <- `nifti_dir`
                 │   ├── subject_01.nii.gz
                 │   ├── subject_01.bvec
                 │   └── subject_01.bval
