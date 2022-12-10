@@ -81,4 +81,4 @@ if __name__ == '__main__':
         subject.study_summary_file = subject.web_summary_dir / \
             f'{subject.site}.html'
 
-        subject.subject_pipeline()
+        subject.subject_pipeline(force=args.force)
