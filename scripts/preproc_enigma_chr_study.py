@@ -42,12 +42,13 @@ if __name__ == '__main__':
         enigmaChrStudy = EnigmaChrStudy(args.bids_root,
                                         site=args.site,
                                         raw_data_type='nifti')
-        [x.check_diff_nifti_info() for x in enigmaChrStudy.subject_classes]
     else:
         enigmaChrStudy = EnigmaChrStudy(args.bids_root,
                                         site=args.site)
         [x.check_dicom_info() for x in enigmaChrStudy.subject_classes]
-        [x.check_diff_nifti_info() for x in enigmaChrStudy.subject_classes]
+
+    [x.check_diff_nifti_info() for x in enigmaChrStudy.subject_classes]
+    [x.eddy_squeeze() for x in enigmaChrStudy.subject_classes]
 
     if len(enigmaChrStudy.subjects) >= 1:
         # Run tbss
