@@ -246,9 +246,14 @@ class DwiToolsStudy(object):
     def build_study_progress(self):
         '''Build for study summary'''
         self.number_of_subjects = len(self.subjects)
-        self.pass_dicom = len(
-                [sum(~x.dicom_header_series.isnull()) > 3 for x
-                    in self.subject_classes])
+
+        try:
+            self.pass_dicom = len(
+                    [sum(~x.dicom_header_series.isnull()) > 3 for x
+                        in self.subject_classes])
+        except AttributeError:
+            self.pass_dicom = 0
+
         self.pass_bvec = self.count_subject('diff_raw_bvec')
         self.pass_bval = self.count_subject('diff_raw_bval')
         self.pass_dwi = self.count_subject('diff_raw_dwi')
