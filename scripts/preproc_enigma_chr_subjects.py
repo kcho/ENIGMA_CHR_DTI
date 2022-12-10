@@ -58,6 +58,7 @@ if __name__ == '__main__':
 
     config_loc = '/opt/ENIGMA_CHR_DTI/enigmaObjPipe/config.ini'
     config = read_objPipe_config(config_loc)
+
     for subject_path in subject_paths:
         if subject_path.name.startswith('.'):
             continue
@@ -82,3 +83,4 @@ if __name__ == '__main__':
             f'{subject.site}.html'
 
         subject.subject_pipeline(force=args.force)
+        del subject
