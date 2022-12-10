@@ -70,13 +70,14 @@ class DicomToolsStudy(object):
         try:
             self.dicom_df = pd.DataFrame(
                     [x.dicom_header_series for x in self.subject_classes])
+            self.dicom_df.drop('AcquisitionDate', axis=1, inplace=True)
+            self.dicom_df = self.dicom_df.astype(str)
+            cols_to_check = [x for x in self.dicom_df.columns if x != 'subject']
+            self.dicom_df_unique = self.dicom_df.groupby(cols_to_check)
+            self.dicom_df_html = self.dicom_df_unique.count().T.to_html(
+                    classes=["table-bordered", "table-striped", "table-hover"]
+                    )
         except AttributeError:
             self.dicom_df = pd.DataFrame()
-        self.dicom_df.drop('AcquisitionDate', axis=1, inplace=True)
-        self.dicom_df = self.dicom_df.astype(str)
-        cols_to_check = [x for x in self.dicom_df.columns if x != 'subject']
-        self.dicom_df_unique = self.dicom_df.groupby(cols_to_check)
-        self.dicom_df_html = self.dicom_df_unique.count().T.to_html(
-                classes=["table-bordered", "table-striped", "table-hover"]
-                )
+            self.dicom_df_html = self.dicom_df.to_html()
 
