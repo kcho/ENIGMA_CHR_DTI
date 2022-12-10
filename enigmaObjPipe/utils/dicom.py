@@ -67,8 +67,11 @@ class DicomTools(object):
 
 class DicomToolsStudy(object):
     def dicom_header_summary(self):
-        self.dicom_df = pd.DataFrame(
-                [x.dicom_header_series for x in self.subject_classes])
+        try:
+            self.dicom_df = pd.DataFrame(
+                    [x.dicom_header_series for x in self.subject_classes])
+        except AttributeError:
+            self.dicom_df = pd.DataFrame()
         self.dicom_df.drop('AcquisitionDate', axis=1, inplace=True)
         self.dicom_df = self.dicom_df.astype(str)
         cols_to_check = [x for x in self.dicom_df.columns if x != 'subject']
