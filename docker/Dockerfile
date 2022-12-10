@@ -171,9 +171,8 @@ RUN /bin/bash /opt/tbss/install.sh setup
 # eddy-squeeze
 #RUN git clone https://github.com/pnlbwh/eddy-squeeze /opt/eddy-squeeze
 RUN pwd
-RUN pwd
 RUN pip install eddy-squeeze==1.0.9
-RUN pip install nifti-snapshot==0.1.18
+RUN pip install nifti-snapshot==0.1.19
 
 
 # clone https://github.com/pnlbwh/CNN-Diffusion-MRIBrain-Segmentation

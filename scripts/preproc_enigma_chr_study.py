@@ -47,8 +47,6 @@ if __name__ == '__main__':
                                         site=args.site)
 
     if len(enigmaChrStudy.subjects) >= 1:
-        enigmaChrStudy.project_pipeline(test=args.test)
-
         # Run tbss
         enigmaChrStudy.tbss_all_modalities = ['dti_FA', 'dti_RD',
                                               'dti_MD', 'dti_L1']
