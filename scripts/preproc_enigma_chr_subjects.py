@@ -59,6 +59,9 @@ if __name__ == '__main__':
     config_loc = '/opt/ENIGMA_CHR_DTI/enigmaObjPipe/config.ini'
     config = read_objPipe_config(config_loc)
     for subject_path in subject_paths:
+        if subject_path.name.startswith('.'):
+            continue
+
         if args.nifti_input:
             subject = EnigmaChrSubjectNiftiDir(subject_path)
         else:  # dicom input
