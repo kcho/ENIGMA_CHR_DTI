@@ -72,8 +72,6 @@ class EddyPipe(object):
 
     def eddy_squeeze(self, force: bool = False):
         '''Eddy QC', force: bool = False'''
-        print(self.eddy_squeeze_dir)
-        print('hahah')
         out_dir = self.diff_ep.parent / 'outlier_figures'
 
         self.eddyQc = EddyFigure(
