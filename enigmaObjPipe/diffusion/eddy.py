@@ -4,6 +4,8 @@ import nibabel as nb
 import sys
 from dipy.segment.mask import median_otsu
 import shutil
+from eddy_squeeze.eddy_squeeze_lib import eddy_web
+from eddy_squeeze.eddy_squeeze_lib.eddy_present import EddyFigure
 
 
 class EddyPipe(object):
@@ -72,29 +74,28 @@ class EddyPipe(object):
         '''Eddy QC', force: bool = False'''
         print(self.eddy_squeeze_dir)
         print('hahah')
-        sys.path.append(self.eddy_squeeze_dir + '/eddy_squeeze')
-        import eddy_plots
-        import eddy_web
-
         out_dir = self.diff_ep.parent / 'outlier_figures'
 
-        self.eddyQc = eddy_plots.EddyFigure(
+        self.eddyQc = EddyFigure(
                 self.diff_ep.parent,
                 out_dir)
 
         self.eddyQc.summary_df()
         self.image_list = []
-        print('hohohohoh')
-        self.eddyQc.save_all_outlier_slices()
 
-        self.eddyQc.df_motion.to_csv(out_dir / 'motion.csv')
-        self.eddyQc.df.to_csv(out_dir / 'outlier_slices.csv')
+        if not out_dir.is_dir() or force:
+            self.eddyQc.save_all_outlier_slices()
+
+        if not (out_dir / 'motion.csv').is_file() or force:
+            self.eddyQc.df_motion.to_csv(out_dir / 'motion.csv')
+
+        if not (out_dir / 'outlier_slices.csv').is_file() or force:
+            self.eddyQc.df.to_csv(out_dir / 'outlier_slices.csv')
 
         eddy_web.create_html(self.eddyQc, out_dir=out_dir)
 
     def create_fake_eddy_output(self, eddy_command):
         '''Create fake eddy output'''
-        import shutil
         shutil.copy(self.diff_dwi_unring, self.diff_ep.with_suffix('.nii.gz'))
         shutil.copy(self.diff_dwi_unring,
                     str(self.diff_ep) + '.eddy_outlier_free_data.nii.gz')

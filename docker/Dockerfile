@@ -172,7 +172,7 @@ RUN /bin/bash /opt/tbss/install.sh setup
 #RUN git clone https://github.com/pnlbwh/eddy-squeeze /opt/eddy-squeeze
 RUN pwd
 RUN pwd
-RUN pip install eddy-squeeze
+RUN pip install eddy-squeeze==1.0.9
 RUN pip install nifti-snapshot==0.1.18
 
 
