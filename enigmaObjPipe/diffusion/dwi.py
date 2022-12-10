@@ -189,7 +189,10 @@ class DwiPipe(object):
         eddyRun.prepared = True
 
         # dicom info
-        eddyRun.dicom_header_series = self.dicom_header_series
+        if 'dicom_header_series' in dir(self):
+            eddyRun.dicom_header_series = self.dicom_header_series
+        else:
+            eddyRun.dicom_header_series = pd.Series()
         eddyRun.nifti_header_series = self.nifti_header_series
 
         self.eddyRun = eddyRun
