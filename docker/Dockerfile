@@ -191,7 +191,6 @@ RUN cd /opt/CNN-Diffusion-MRIBrain-Segmentation && \
 
 
 # ENIGMA CHR pipeline
-RUN pwd
 RUN git clone https://github.com/kcho/ENIGMA_CHR_DTI /opt/ENIGMA_CHR_DTI
 ENV PYTHONPATH="/opt/ENIGMA_CHR_DTI:${PYTHONPATH}"
 ENV PATH="/opt/ENIGMA_CHR_DTI/scripts:${PATH}"
@@ -223,6 +222,8 @@ RUN dipy_gibbs_ringing -h
 WORKDIR /data
 
 RUN apt-get install -y x11-apps
+RUN pwd
+RUN pwd
 RUN pwd
 RUN cd /opt/ENIGMA_CHR_DTI && git pull
 

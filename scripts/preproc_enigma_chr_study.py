@@ -58,7 +58,7 @@ if __name__ == '__main__':
         fp.write('-'*80)
         fp.write(f'Root directory: {enigmaChrStudy.root_dir}\n')
         fp.write(f'sourcedata directory: {enigmaChrStudy.source_dir}\n')
-        fp.write(f'rawdata directory: {enigmaChrStudy.rawdata_dir}\n')
+        fp.write(f'rawdata directory: {enigmaChrStudy.rawdata_root}\n')
         fp.write(f'derivatives directory: {enigmaChrStudy.derivatives_root}\n')
         fp.write('List of subjects\n')
         for subject_class in enigmaChrStudy.subject_classes:
