@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
     with open(log_file, 'a') as fp:
         fp.write('-'*80)
-        fp.write(f'Roo*80t directory: {enigmaChrStudy.root_dir}\n')
+        fp.write(f'Root directory: {enigmaChrStudy.root_dir}\n')
         fp.write(f'sourcedata directory: {enigmaChrStudy.source_dir}\n')
         fp.write(f'rawdata directory: {enigmaChrStudy.rawdata_dir}\n')
         fp.write(f'derivatives directory: {enigmaChrStudy.derivatives_root}\n')
@@ -68,6 +68,10 @@ if __name__ == '__main__':
             fp.write(f'\t\tbval: {subject_class.diff_raw_bval}\n')
             fp.write(f'\t\tbvec: {subject_class.diff_raw_bvec}\n')
         fp.write('-'*80)
+
+    with open(log_file, 'r') as fp:
+        for i in fp.readlines():
+            print(i)
 
     [x.check_diff_nifti_info() for x in enigmaChrStudy.subject_classes]
     [x.eddy_squeeze() for x in enigmaChrStudy.subject_classes]
