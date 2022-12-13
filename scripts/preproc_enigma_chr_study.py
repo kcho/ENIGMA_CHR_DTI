@@ -67,7 +67,7 @@ if __name__ == '__main__':
             fp.write(f'\t\tdwi: {subject_class.diff_raw_dwi}\n')
             fp.write(f'\t\tbval: {subject_class.diff_raw_bval}\n')
             fp.write(f'\t\tbvec: {subject_class.diff_raw_bvec}\n')
-        fp.write('-'*80)
+        fp.write('-'*80 + '\n')
 
     with open(log_file, 'r') as fp:
         for i in fp.readlines():
