@@ -55,7 +55,7 @@ if __name__ == '__main__':
         [x.check_dicom_info() for x in enigmaChrStudy.subject_classes]
 
     with open(log_file, 'a') as fp:
-        fp.write('-'*80)
+        fp.write('-'*80 + '\n')
         fp.write(f'Root directory: {enigmaChrStudy.root_dir}\n')
         fp.write(f'sourcedata directory: {enigmaChrStudy.source_dir}\n')
         fp.write(f'rawdata directory: {enigmaChrStudy.rawdata_root}\n')
