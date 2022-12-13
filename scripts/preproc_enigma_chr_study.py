@@ -28,6 +28,8 @@ def parse_args(argv):
     argparser.add_argument("--force", "-f", action='store_true',
                            help='Force re-run')
 
+    argparser.add_argument("--log", "-l", help='Save log')
+
     argparser.add_argument("--test", "-test", action='store_true',
                            help='Test run')
 
@@ -38,14 +40,34 @@ def parse_args(argv):
 if __name__ == '__main__':
     args = parse_args(sys.argv[1:])
 
+    if args.log:
+        log_file = args.log
+    else:
+        log_file = '.pipeline_log'
+
     if args.nifti_input:
         enigmaChrStudy = EnigmaChrStudy(args.bids_root,
                                         site=args.site,
                                         raw_data_type='nifti')
-    else:
+    else:  # dicom information
         enigmaChrStudy = EnigmaChrStudy(args.bids_root,
                                         site=args.site)
         [x.check_dicom_info() for x in enigmaChrStudy.subject_classes]
+
+    with open(log_file, 'a') as fp:
+        fp.write('-'*80)
+        fp.write(f'Roo*80t directory: {enigmaChrStudy.root_dir}\n')
+        fp.write(f'sourcedata directory: {enigmaChrStudy.source_dir}\n')
+        fp.write(f'rawdata directory: {enigmaChrStudy.rawdata_dir}\n')
+        fp.write(f'derivatives directory: {enigmaChrStudy.derivatives_root}\n')
+        fp.write('List of subjects\n')
+        for subject_class in enigmaChrStudy.subject_classes:
+            fp.write(f'\t{subject_class.subject_name}\n')
+            fp.write(f'\tdwi directory: {subject_class.diff_dir}\n')
+            fp.write(f'\t\tdwi: {subject_class.diff_raw_dwi}\n')
+            fp.write(f'\t\tbval: {subject_class.diff_raw_bval}\n')
+            fp.write(f'\t\tbvec: {subject_class.diff_raw_bvec}\n')
+        fp.write('-'*80)
 
     [x.check_diff_nifti_info() for x in enigmaChrStudy.subject_classes]
     [x.eddy_squeeze() for x in enigmaChrStudy.subject_classes]
