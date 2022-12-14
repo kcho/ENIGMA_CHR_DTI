@@ -139,12 +139,20 @@ class DwiPipe(object):
             self.run(command)
 
     def check_diff_nifti_info(self, force: bool = False):
-        assert self.diff_raw_dwi.is_file(), 'Diffusion DWI is missing'
-        assert self.diff_raw_bvec.is_file(), 'Diffusion bvec is missing'
-        assert self.diff_raw_bval.is_file(), 'Diffusion bval is missing'
+        assert self.diff_raw_dwi.is_file(), \
+                f'{self.subject_name}: Diffusion DWI is missing ' \
+                f'({self.diff_raw_dwi})'
+        assert self.diff_raw_bvec.is_file(), \
+                f'{self.subject_name}: Diffusion bvec is missing ' \
+                f'({self.diff_raw_bvec})'
+        assert self.diff_raw_bval.is_file(), \
+                f'{self.subject_name}: Diffusion bval is missing ' \
+                f'({self.diff_raw_bval})'
 
         img = nb.load(self.diff_raw_dwi)
-        assert len(img.shape) == 4, 'DWI is not 4D file'
+        assert len(img.shape) == 4, \
+                f'{self.subject_name}: DWI is not 4D file ' \
+                f'({self.diff_raw_dwi})'
 
         self.nifti_header_series = pd.Series({
             'subject': self.subject_name,
@@ -157,7 +165,9 @@ class DwiPipe(object):
         bval_arr = np.loadtxt(str(self.diff_raw_bval))
         bval_arr = np.round(bval_arr, -2)
         self.nifti_header_series['bval arr'] = len(np.ravel(bval_arr))
-        assert img.shape[-1] in bval_arr.shape, 'bval does not match dwi'
+        assert img.shape[-1] in bval_arr.shape, \
+                f'{self.subject_name}: bval does not match dwi ' \
+                f'({self.diff_raw_bval})'
 
         unique_bval = np.unique(bval_arr)
         self.nifti_header_series['bvals'] = unique_bval.astype(int)
@@ -173,7 +183,9 @@ class DwiPipe(object):
         # load bvec
         bvec_arr = np.loadtxt(str(self.diff_raw_bvec))
         self.nifti_header_series['bvec arr'] = bvec_arr.shape
-        assert img.shape[-1] in bvec_arr.shape, 'bvec does not match dwi'
+        assert img.shape[-1] in bvec_arr.shape, \
+                f'{self.subject_name}: bvec does not match dwi ' \
+                f'({self.diff_raw_bvec})'
 
 
     def eddy_squeeze(self, force: bool = False):
