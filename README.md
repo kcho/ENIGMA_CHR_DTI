@@ -165,6 +165,35 @@ $ singularity shell -e -B ${enigma_chr_dir}:/data \
     enigma_chr_pipeline.simg xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data --nifti_input
 ```
 
+### If you get memory error, follow the steps below.
+
+#### Step 1.
+
+```
+# docker
+docker run -it -v ${data_location}:/data enigma-chr-pipeline /bin/bash
+# singularity
+singularity shell -e -B ${data_location}:/data enigma-chr-pipeline.simg /bin/bash
+
+# Then once in docker shell,
+$ xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_subjects.py -b /data
+$ exit
+```
+
+#### Step 2.
+ 
+```
+# docker
+docker run -it -v ${data_location}:/data enigma-chr-pipeline /bin/bash
+ 
+# singularity
+singularity shell -e -B ${data_location}:/data enigma-chr-pipeline.simg /bin/bash
+ 
+Then once in docker shell,
+$ xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_study.py -b /data
+$ exit
+```
+
 
 ## Sharing outputs to other teams
 
