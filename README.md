@@ -171,27 +171,21 @@ $ singularity shell -e -B ${enigma_chr_dir}:/data \
 
 ```
 # docker
-docker run -it -v ${data_location}:/data enigma-chr-pipeline /bin/bash
-# singularity
-singularity shell -e -B ${data_location}:/data enigma-chr-pipeline.simg /bin/bash
+docker run -it -v ${data_location}:/data enigma-chr-pipeline xvfb-run -a /opt/miniconda-latest/bin/python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_subjects.py -b /data
 
-# Then once in docker shell,
-$ xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_subjects.py -b /data
-$ exit
+# singularity
+singularity exec -B ${data_location}:/data enigma-chr-pipeline.simg xvfb-run -a /opt/miniconda-latest/bin/python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_subjects.py -b /data
 ```
 
 #### Step 2.
  
 ```
 # docker
-docker run -it -v ${data_location}:/data enigma-chr-pipeline /bin/bash
- 
+docker run -it -v ${data_location}:/data enigma-chr-pipeline xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_study.py -b /data
+
 # singularity
-singularity shell -e -B ${data_location}:/data enigma-chr-pipeline.simg /bin/bash
- 
-Then once in docker shell,
-$ xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_study.py -b /data
-$ exit
+singularity exec -B ${data_location}:/data enigma-chr-pipeline.simg xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_study.py -b /data
+
 ```
 
 
