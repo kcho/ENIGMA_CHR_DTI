@@ -4,6 +4,19 @@ import pandas as pd
 from pathlib import Path
 import shutil
 
+
+class PartialDicomException(Exception):
+    pass
+
+
+class ExtraDicomException(Exception):
+    pass
+
+
+class NoDicomException(Exception):
+    pass
+
+
 class DicomTools(object):
     def check_dicom_info(self, force: bool = False):
         '''Extract information from dicom header and store it in a dataframe'''
@@ -17,6 +30,9 @@ class DicomTools(object):
             'RepetitionTime', 'SequenceName', 'SliceThickness',
             'SoftwareVersions', 'SpacingBetweenSlices'
         ]
+
+        if len(list(self.dicom_dir.glob('*'))) == 0:
+            raise NoDicomException
 
         for root, dirs, files in os.walk(self.dicom_dir):
             for file in [x for x in files if not x.startswith('.')]:
@@ -51,11 +67,17 @@ class DicomTools(object):
             self.dicom_header_series[i] = 'no dicom input'
 
 
-    def convert_dicom_into_bids(self, force: bool = False):
+    def convert_dicom_into_bids(self,
+                                force: bool = False,
+                                re_run: bool = False,
+                                test: bool = False):
         if force:
-            shutil.rmtree(self.nifti_dir)
+            if self.nifti_dir.is_dir():
+                shutil.rmtree(self.nifti_dir)
 
-        if not self.nifti_dir.is_dir() or not self.diff_raw_dwi.is_file():
+        if not self.diff_raw_dwi.is_file() and \
+                not self.diff_raw_bvec.is_file() and \
+                not self.diff_raw_bval.is_file():
             command = f'{self.dcm2niix} \
                     -o {self.nifti_dir} \
                     -f {self.subject_name} \
@@ -63,6 +85,29 @@ class DicomTools(object):
                     {self.dicom_dir}'
             self.nifti_dir.mkdir(exist_ok=True, parents=True)
             self.run(command)
+
+        elif not re_run and not all([self.diff_raw_dwi.is_file(),
+                                     self.diff_raw_bvec.is_file(),
+                                     self.diff_raw_bval.is_file()]):
+            print('Rerun')
+            self.convert_dicom_into_bids(force=True, test=test)
+        elif re_run and not all([self.diff_raw_dwi.is_file(),
+                                     self.diff_raw_bvec.is_file(),
+                                     self.diff_raw_bval.is_file()]):
+            raise PartialDicomException
+        else:
+            pass
+
+        if test:
+            return
+
+        if len(list(self.nifti_dir.glob('*'))) > 4:
+            print(list(self.nifti_dir.glob('*')))
+            raise ExtraDicomException
+
+        if len(list(self.nifti_dir.glob('*'))) < 4:
+            print(list(self.nifti_dir.glob('*')))
+            raise PartialDicomException
 
 
 class DicomToolsStudy(object):

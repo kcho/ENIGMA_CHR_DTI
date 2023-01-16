@@ -1,18 +1,28 @@
 from pathlib import Path
 import sys
 import os
+import re
 import pandas as pd
 
-sys.path.append('/Users/kc244/ENIGMA_CHR_DTI')
 from enigmaObjPipe.utils.paths import read_objPipe_config
 from enigmaObjPipe.utils.dicom import DicomTools, DicomToolsStudy
+from enigmaObjPipe.utils.dicom import PartialDicomException, \
+        ExtraDicomException, NoDicomException
 from enigmaObjPipe.utils.run import RunCommand
 from enigmaObjPipe.utils.snapshots import Snapshot
-from enigmaObjPipe.utils.web_summary import create_subject_summary, create_project_summary
+from enigmaObjPipe.utils.web_summary import create_subject_summary, \
+        create_project_summary
 from enigmaObjPipe.diffusion.dwi import DwiPipe, DwiToolsStudy
+from enigmaObjPipe.diffusion.dwi import MissingBvalException, \
+        MissingBvecException, MissingDwiException, WrongBvalException, \
+        WrongBvecException, WrongDwiException
 from enigmaObjPipe.diffusion.eddy import EddyPipe
 from enigmaObjPipe.diffusion.tbss import StudyTBSS
 from enigmaObjPipe.denoising.gibbs import NoiseRemovalPipe
+
+
+class PartialDataCases(Exception):
+    pass
 
 
 class EnigmaChrSubjectDicomDir(
@@ -78,13 +88,12 @@ class EnigmaChrSubjectDicomDir(
         self.check_dicom_info(force)
 
         # 2. convert dicom files into nifti format, in BIDS
-        self.convert_dicom_into_bids(force)
+        self.convert_dicom_into_bids(force=force, test=test)
 
         # 3. check if the conversion worked correctly
         self.check_diff_nifti_info(force)
         self.snapshot_first_b0(self.diff_raw_dwi, 'Raw DWI', force)
                       
-
         # 4. Diffusion preprocessing
         # 4a. gibbs unring
         print('Gibbs Unring')
@@ -235,11 +244,11 @@ class EnigmaChrSubjectNiftiDir(EnigmaChrSubjectDicomDir):
         self.preproc_completed = True
 
 
-
 class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         DicomToolsStudy, DwiToolsStudy):
     def __init__(self, root_dir: Path, site: str = None,
-                 raw_data_type: str = 'dicom'):
+                 raw_data_type: str = 'dicom',
+                 config_loc: str = None):
         '''ENIGMA CHR Project directory object
 
         Key argument:
@@ -323,7 +332,8 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
                 f'{self.site}.html'
 
         # set settings from config
-        config_loc = '/opt/ENIGMA_CHR_DTI/enigmaObjPipe/config.ini'
+        if config_loc is None:
+            config_loc = '/opt/ENIGMA_CHR_DTI/enigmaObjPipe/config.ini'
         config = read_objPipe_config(config_loc)
         for subject in self.subject_classes:
             for key in config['software']:
@@ -340,14 +350,89 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         '''Study wise pipeline'''
 
         # Run subject level preprocessing
+        error_df = pd.DataFrame(columns=['subject', 'error'])
         for subject in self.subject_classes:
+            error_df_tmp = pd.DataFrame(
+                    {'subject': [subject.subject_name]})
             try:
                 subject.subject_pipeline(force=force, test=test)
-            except:
-                print('***')
-                print('Error in preprocessing {subject.subject_name}')
-                print('***')
+            except NoDicomException:
+                error_df_tmp['error'] = 'No dicom files'
+                error_df_tmp['data_loc'] = subject.dicom_dir
+                error_df_tmp['note'] = 'Dicom files are missing for this ' \
+                    'subject.'
+            except PartialDicomException:
+                error_df_tmp['error'] = 'Incomplete or incorrect dicom files'
+                error_df_tmp['data_loc'] = subject.dicom_dir
+                error_df_tmp['note'] = 'The dicom input does not contain ' \
+                    'all the DWI related information. Please check if you ' \
+                    'provided correct dicom files for this subject. Also ' \
+                    'see files created from the given dicom files under ' \
+                    f'{subject.nifti_dir}.'
+            except ExtraDicomException:
+                error_df_tmp['error'] = 'Incomplete or incorrect dicom files'
+                error_df_tmp['data_loc'] = subject.dicom_dir
+                error_df_tmp['note'] = 'The dicom input creates extra files ' \
+                    'that may interfere with diffusion preprocessing. ' \
+                    'Please check if you provided correct dicom files for ' \
+                    'this subject. Also see files created from the given ' \
+                    f'dicom files under {subject.nifti_dir}.'
+            except MissingDwiException:
+                error_df_tmp['error'] = 'Missing DWI nifti file'
+                error_df_tmp['data_loc'] = subject.diff_raw_dwi
+                error_df_tmp['note'] = 'The DWI nifti file is missing. ' \
+                    'Please check if there is DWI nifti file.'
+            except MissingBvalException:
+                error_df_tmp['error'] = 'Missing bval file'
+                error_df_tmp['data_loc'] = subject.diff_raw_bval
+                error_df_tmp['note'] = 'The bval file is missing. ' \
+                    'Please check if there is bval file.'
+            except MissingBvecException:
+                error_df_tmp['error'] = 'Missing bvec file'
+                error_df_tmp['data_loc'] = subject.diff_raw_bvec
+                error_df_tmp['note'] = 'The bvec file is missing. ' \
+                    'Please check if there is bvec file.'
+            except WrongDwiException:
+                error_df_tmp['error'] = 'Wrong DWI nifti file'
+                error_df_tmp['data_loc'] = subject.diff_raw_dwi
+                error_df_tmp['note'] = 'The DWI nifti is not 4D. Please ' \
+                    'check if you provided the correct data.'
+            except WrongBvalException:
+                error_df_tmp['error'] = 'Wrong bval file'
+                error_df_tmp['data_loc'] = subject.diff_raw_bval
+                error_df_tmp['note'] = 'The bval does not match the given ' \
+                    'DWI nifti file. Please check if you provided the ' \
+                    'correct data.'
+            except WrongBvecException:
+                error_df_tmp['error'] = 'Wrong bvec file'
+                error_df_tmp['data_loc'] = subject.diff_raw_bvec
+                error_df_tmp['note'] = 'The bvec does not match the given ' \
+                    'DWI nifti file. Please check if you provided the ' \
+                    'correct data.'
 
+            error_df = pd.concat([error_df, error_df_tmp]).reset_index(
+                    drop=True)
+
+        error_df = error_df[~error_df.error.isnull()]
+
+        if len(error_df) > 0:
+            error_files = self.root_dir.glob('cases_with_error_v*.csv')
+            max_num = 0
+            for error_file in error_files:
+                num = int(re.search(r'cases_with_error_v(\d*).csv',
+                                    error_file.name).group(1))
+                if num > max_num:
+                    max_num = num
+
+            error_file_to_write = self.root_dir / \
+                    f'cases_with_error_v{max_num + 1}.csv'
+            error_df.to_csv(error_file_to_write)
+            print(f'There are {len(error_df)} subjects with data deviation. '
+                  f'Please check "{error_file_to_write}" under your input '
+                  'data directory and resolve all issues before re-running '
+                  'the code.')
+            raise PartialDataCases
+                
         # Run tbss
         self.tbss_all_modalities = ['dti_FA', 'dti_RD', 'dti_MD', 'dti_L1']
         self.tbss_all_modalities_str = ['FA', 'RD', 'MD', 'AD']
