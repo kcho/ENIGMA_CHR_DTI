@@ -24,6 +24,9 @@ from enigmaObjPipe.denoising.gibbs import NoiseRemovalPipe
 class PartialDataCases(Exception):
     pass
 
+class ProcessingFailure(Exception):
+    pass
+
 
 class EnigmaChrSubjectDicomDir(
         DicomTools, RunCommand, DwiPipe, NoiseRemovalPipe, EddyPipe,
@@ -82,7 +85,10 @@ class EnigmaChrSubjectDicomDir(
                 f'{self.subject_name}.html'
 
 
-    def subject_pipeline(self, force: bool = False, test: bool = False):
+    def subject_pipeline(self,
+                         force: bool = False,
+                         check_run: bool = False,
+                         test: bool = False):
         '''Subject-wise pipeline'''
         # 1. check basic dicom information from dicom headers
         self.check_dicom_info(force)
@@ -92,6 +98,10 @@ class EnigmaChrSubjectDicomDir(
 
         # 3. check if the conversion worked correctly
         self.check_diff_nifti_info(force)
+
+        if check_run:
+            return
+
         self.snapshot_first_b0(self.diff_raw_dwi, 'Raw DWI', force)
                       
         # 4. Diffusion preprocessing
@@ -183,13 +193,20 @@ class EnigmaChrSubjectNiftiDir(EnigmaChrSubjectDicomDir):
 
         EnigmaChrSubjectDicomDir.__init__(self, dicom_dir_missing)
 
-    def subject_pipeline(self, force: bool = False, test: bool = False):
+    def subject_pipeline(self,
+                         force: bool = False,
+                         check_run: bool = False,
+                         test: bool = False):
         '''Subject-wise pipeline'''
         # register 'no dicom input' to self.dicom_header_series attr
         self.no_dicom_info(force)
 
         # 3. check if the conversion worked correctly
         self.check_diff_nifti_info(force)
+
+        if check_run:
+            return
+
         self.snapshot_first_b0(self.diff_raw_dwi, 'Raw DWI', force)
                       
         # 4. Diffusion preprocessing
@@ -355,7 +372,9 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
             error_df_tmp = pd.DataFrame(
                     {'subject': [subject.subject_name]})
             try:
-                subject.subject_pipeline(force=force, test=test)
+                subject.subject_pipeline(force=force,
+                                         check_run=True,
+                                         test=test)
             except NoDicomException:
                 error_df_tmp['error'] = 'No dicom files'
                 error_df_tmp['data_loc'] = subject.dicom_dir
@@ -432,6 +451,24 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
                   'data directory and resolve all issues before re-running '
                   'the code.')
             raise PartialDataCases
+
+        # Actual processing
+        processing_failed_subject_classes = []
+        for subject in self.subject_classes:
+            error_df_tmp = pd.DataFrame(
+                    {'subject': [subject.subject_name]})
+            try:
+                subject.subject_pipeline(force=force,
+                                         check_run=True,
+                                         test=test)
+            except:
+                processing_failed_subject_classes.append(subject)
+                print(f'{subject.name}: raised processing error')
+
+        if len(processing_failed_subject_classes) > 0:
+            print(f'{len(processing_failed_subject_classes)} case(s) failed '
+                  'processing. Please check the log file.')
+            raise ProcessingFailure
                 
         # Run tbss
         self.tbss_all_modalities = ['dti_FA', 'dti_RD', 'dti_MD', 'dti_L1']

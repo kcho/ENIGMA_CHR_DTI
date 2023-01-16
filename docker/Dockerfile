@@ -224,6 +224,8 @@ WORKDIR /data
 RUN pwd
 RUN pwd
 RUN pwd
+RUN pwd
+RUN pwd
 RUN apt-get install -y x11-apps
 RUN cd /opt/ENIGMA_CHR_DTI && git pull
 
