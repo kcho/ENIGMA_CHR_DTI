@@ -2,6 +2,7 @@ import re
 import os
 import numpy as np
 import pandas as pd
+import nibabel as nb
 from pathlib import Path
 import argparse
 
@@ -214,9 +215,6 @@ class StudyTBSS(object):
                               'ENIGMA Template FA skeleton', force=force)
 
         # template skeleton with template FA
-        import nibabel as nb
-        import numpy as np
-
         self.tbss_all_FA_skel = self.tbss_stats_dir / \
                 'all_FA_skeletonized.nii.gz'
 

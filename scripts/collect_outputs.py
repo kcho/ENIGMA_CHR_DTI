@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 from pathlib import Path
 import zipfile
 import os
@@ -33,7 +32,11 @@ def compress_outputs():
         else:
             (Path(fp) / 'tbss' / 'stats').mkdir(parents=True)
             for i in (tbss_root / 'stats').glob('*csv'):
-                shutil.copy(i, Path(fp) / 'tbss')
+                shutil.copy(i, Path(fp) / 'tbss/stats')
+
+            (Path(fp) / 'tbss' / 'slicesdir').mkdir(parents=True)
+            for i in (tbss_root / 'FA/slicesdir').glob('*'):
+                shutil.copy(i, Path(fp) / 'tbss/slicesdir')
 
         dirs_to_compress = [eddy_qc_root,
                             screenshots_root,
@@ -45,7 +48,7 @@ def compress_outputs():
             else:
                 print(f'No data under {i}')
 
-        if not (tbss_root / 'snapshots').is_dir():
+        if (tbss_root / 'snapshots').is_dir():
             shutil.copytree(tbss_root / 'snapshots',
                             Path(fp) / 'tbss' / 'snapshots')
 
