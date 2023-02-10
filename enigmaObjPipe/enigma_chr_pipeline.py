@@ -90,7 +90,6 @@ class EnigmaChrSubjectDicomDir(
                          check_run: bool = False,
                          test: bool = False):
         '''Subject-wise pipeline'''
-        print('dicom subject pipeline')
         # 1. check basic dicom information from dicom headers
         self.check_dicom_info(force)
 
@@ -459,17 +458,13 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         for subject in self.subject_classes:
             error_df_tmp = pd.DataFrame(
                     {'subject': [subject.subject_name]})
-            print(error_df_tmp)
             try:
                 subject.subject_pipeline(force=force,
-                                         check_run=True,
                                          test=test)
-                print('ha')
             except:
                 processing_failed_subject_classes.append(subject)
                 print(f'{subject.name}: raised processing error')
 
-        print(processing_failed_subject_classes)
         if len(processing_failed_subject_classes) > 0:
             print(f'{len(processing_failed_subject_classes)} case(s) failed '
                   'processing. Please check the log file.')
