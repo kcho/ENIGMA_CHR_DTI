@@ -105,6 +105,8 @@ This command will automatically download the pipeline including all the dependen
 
 ### Arrange your Dicom files as the following structure.
 
+![data_struct_example](docs/data_structure.png?raw=true "Data structure")
+
 ```
 /Users/kc244/enigma_chr_data  <-  it could be somewhere else
 └── sourcedata
