@@ -307,7 +307,6 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
             self.subjects = list(sorted([x for x in self.source_dir.glob('*')
                 if not x.name.startswith('.')]))
         
-            print(self.subjects)
             # make sure there are at least one subject
             if len(self.subjects) < 1:
                 print('-'*80)
@@ -432,6 +431,7 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
 
             error_df = pd.concat([error_df, error_df_tmp]).reset_index(
                     drop=True)
+            print(error_df)
 
         error_df = error_df[~error_df.error.isnull()]
 
