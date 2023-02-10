@@ -63,6 +63,10 @@ Installing the pipeline through Docker would be a preferred option for the resea
 - [Download Docker Desktop](https://www.docker.com/products/docker-desktop/)
     - configure Docker to have at least 4 cores (12 cores preferably) and 4 GB RAM (16 GB preferably)
 
+![docker_setting_1](docs/1_preference.png?raw=true "Docker setting 1")
+![docker_setting_2](docs/2_preference.png?raw=true "Docker setting 2")
+
+
 
 #### 2. Download ENIGMA CHR DTI docker image.
 
