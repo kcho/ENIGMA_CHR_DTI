@@ -459,10 +459,11 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         for subject in self.subject_classes:
             error_df_tmp = pd.DataFrame(
                     {'subject': [subject.subject_name]})
+            subject.subject_pipeline(force=force,
+                                     check_run=True,
+                                     test=test)
             try:
-                subject.subject_pipeline(force=force,
-                                         check_run=True,
-                                         test=test)
+                print('ha')
             except:
                 processing_failed_subject_classes.append(subject)
                 print(f'{subject.name}: raised processing error')
