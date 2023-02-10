@@ -1,9 +1,7 @@
 # ENIGMA CHR DTI pipeline
 
-Kevin Cho and Yoobin Kwak
-
-kevincho@bwh.harvard.edu
-yoobinkwak@gmail.com
+* Kevin Cho, kevincho@bwh.harvard.edu
+* Yoobin Kwak, yoobinkwak@gmail.com
 
 
 ## Contents
