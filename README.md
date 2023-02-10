@@ -209,5 +209,5 @@ This toolbox uses the following softwares. Please cite them if you use this pipe
 - [ANTs](https://github.com/ANTsX/ANTs), v2.4.3, 871cad0
 - [PNL TBSS](https://github.com/pnlbwh/TBSS), f95982d
 - [`objPipe`](https://github.com/kcho/objPipe), 1bd277b
-- [`eddy-squeeze`](https://github.com/pnlbwh/eddy-squeeze), c25b266
-- [`nifti-snapshot`](https://github.com/pnlbwh/nifti-snapshot), 771cb8d
+- [`eddy-squeeze`](https://github.com/pnlbwh/eddy-squeeze), version 1.0.9
+- [`nifti-snapshot`](https://github.com/pnlbwh/nifti-snapshot), version 0.1.19
