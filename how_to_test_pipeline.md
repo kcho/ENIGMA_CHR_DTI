@@ -16,8 +16,7 @@ unzip test_data_git.zip
 rm test_data_git.zip
 mv ${test_data_dir}/test_data_git ${test_data_dir}/sourcedata
 
-cp -r ${test_data_dir}/sourcedata/subject_01 \
-    ${test_data_dir}/sourcedata/subject_02
+cp -r ${test_data_dir}/sourcedata/subject_01 ${test_data_dir}/sourcedata/subject_02
 ```
 
 > On Windows operating system
