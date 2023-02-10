@@ -431,9 +431,9 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
 
             error_df = pd.concat([error_df, error_df_tmp]).reset_index(
                     drop=True)
-            print(error_df)
 
         error_df = error_df[~error_df.error.isnull()]
+        print(error_df)
 
         if len(error_df) > 0:
             error_files = self.root_dir.glob('cases_with_error_v*.csv')
@@ -466,6 +466,7 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
                 processing_failed_subject_classes.append(subject)
                 print(f'{subject.name}: raised processing error')
 
+        print(processing_failed_subject_classes)
         if len(processing_failed_subject_classes) > 0:
             print(f'{len(processing_failed_subject_classes)} case(s) failed '
                   'processing. Please check the log file.')
