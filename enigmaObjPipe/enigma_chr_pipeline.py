@@ -198,7 +198,6 @@ class EnigmaChrSubjectNiftiDir(EnigmaChrSubjectDicomDir):
                          check_run: bool = False,
                          test: bool = False):
         '''Subject-wise pipeline'''
-        print('hahhah')
         # register 'no dicom input' to self.dicom_header_series attr
         self.no_dicom_info(force)
 
@@ -459,6 +458,7 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         for subject in self.subject_classes:
             error_df_tmp = pd.DataFrame(
                     {'subject': [subject.subject_name]})
+            print(force, True, test)
             subject.subject_pipeline(force=force,
                                      check_run=True,
                                      test=test)
