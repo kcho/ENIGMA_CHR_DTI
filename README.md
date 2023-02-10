@@ -7,12 +7,13 @@ yoobinkwak@gmail.com
 
 
 ## Contents
-- Introduction
-- Installation
-- Arranging the data for the pipeline
-- Running the ENIGMA CHR DTI Pipeline
-- Sharing outputs to other teams
-- Citation
+
+* [Introduction](#introduction)
+* [Installation](#installation)
+* [Arranging the data for the pipeline](#arranging_the_data_for_the_pipeline)
+* Running the ENIGMA CHR DTI Pipeline
+* Sharing outputs to other teams
+* Citation
 
 
 ## Introduction
