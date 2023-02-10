@@ -2,12 +2,12 @@
 FROM ubuntu:bionic-20200112 as builder
 
 # Installing FSL
-ENV FSLDIR="/opt/fsl-6.0.4" \
-    PATH="/opt/fsl-6.0.4/bin:$PATH" \
+ENV FSLDIR="/opt/fsl-6.0.5" \
+    PATH="/opt/fsl-6.0.5/bin:$PATH" \
     FSLOUTPUTTYPE="NIFTI_GZ" \
     FSLMULTIFILEQUIT="TRUE" \
-    FSLTCLSH="/opt/fsl-6.0.4/bin/fsltclsh" \
-    FSLWISH="/opt/fsl-6.0.4/bin/fslwish" \
+    FSLTCLSH="/opt/fsl-6.0.5/bin/fsltclsh" \
+    FSLWISH="/opt/fsl-6.0.5/bin/fslwish" \
     FSLLOCKDIR="" \
     FSLGECUDAQ="cuda.q"
 
@@ -59,15 +59,16 @@ RUN apt-get update -qq \
 #ENV PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
     #MNI_PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
     #PATH="$FREESURFER_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH"
+#RUN apt-get update
+#RUN apt-get install python2.7 -y
 
 RUN echo "Downloading FSL ..." \
-    && mkdir -p /opt/fsl-6.0.4 \
+    && mkdir -p /opt/fsl-6.0.5 \
     && curl -fL \
-        https://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-6.0.4-centos6_64.tar.gz \
-        | tar -xz -C /opt/fsl-6.0.4 --strip-components 1
+        https://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-6.0.5-centos7_64.tar.gz | tar -xz -C /opt/fsl-6.0.5 --strip-components 1
 
 RUN echo "Installing FSL conda environment ..." \
-    && bash /opt/fsl-6.0.4/etc/fslconf/fslpython_install.sh -f /opt/fsl-6.0.4
+    && bash /opt/fsl-6.0.5/etc/fslconf/fslpython_install.sh -f /opt/fsl-6.0.5; exit 0
 
 # Installing ANTS
 RUN echo "Installing ANTS ..." \
@@ -155,12 +156,12 @@ RUN apt-get update -qq \
 RUN conda install -c conda-forge dipy
 RUN git clone https://github.com/kcho/TBSS /opt/tbss
 
-ENV FSLDIR="/opt/fsl-6.0.4" \
-    PATH="/opt/fsl-6.0.4/bin:$PATH" \
+ENV FSLDIR="/opt/fsl-6.0.5" \
+    PATH="/opt/fsl-6.0.5/bin:$PATH" \
     FSLOUTPUTTYPE="NIFTI_GZ" \
     FSLMULTIFILEQUIT="TRUE" \
-    FSLTCLSH="/opt/fsl-6.0.4/bin/fsltclsh" \
-    FSLWISH="/opt/fsl-6.0.4/bin/fslwish" \
+    FSLTCLSH="/opt/fsl-6.0.5/bin/fsltclsh" \
+    FSLWISH="/opt/fsl-6.0.5/bin/fslwish" \
     FSLLOCKDIR="" \
     FSLMACHINELIST="" \
     FSLREMOTECALL="" \
@@ -221,6 +222,7 @@ RUN dipy_gibbs_ringing -h
 
 WORKDIR /data
 
+RUN pwd
 RUN pwd
 RUN pwd
 RUN pwd

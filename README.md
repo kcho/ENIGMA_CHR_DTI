@@ -55,17 +55,17 @@ Please let the study coordinator know if you need more powerful servers to proce
 
 ## Installation
 
-### with Docker
+> ### with Docker
 
-Installing the pipeline with Docker would be a preferred option for the research centers with private computer servers with **sudo access**.
+Installing the pipeline through Docker would be a preferred option for the research centers with **sudo (administrator) access** on their computing system.
 
-1. Install Docker.
+#### 1. Install Docker.
 
 - [Download Docker Desktop](https://www.docker.com/products/docker-desktop/)
     - configure Docker to have at least 4 cores (12 cores preferably) and 4 GB RAM (16 GB preferably)
 
 
-2. Download ENIGMA CHR DTI docker image.
+#### 2. Download ENIGMA CHR DTI docker image.
 
 In terminal or power-shell (as an administrator), type
 ```
@@ -74,18 +74,18 @@ $ docker pull kcho/enigma-chr-pipeline
 
 This command will automatically download the pipeline including all the dependencies.
 
-3. [Test the pipeline](how_to_test_pipeline.md)
+#### 3. [Test the pipeline](how_to_test_pipeline.md)
 
 
-### with Singularity
+> ### with Singularity
 
-1. Install Singularity.
+#### 1. Install Singularity.
 
 If you can only use your institution's computation system for the analysis without sudo access,
 check with your institution's computation team to get the singularity installed.
 
 
-2. Download ENIGMA CHR DTI singularity image
+#### 2. Download ENIGMA CHR DTI singularity image
 
 In terminal or power-shell, type
 ```
@@ -95,7 +95,7 @@ $ singularity build enigma-chr-pipeline.simg docker://kcho/enigma-chr-pipeline
 This command will automatically download the pipeline including all the dependencies.
 
 
-3. [Test the pipeline](how_to_test_pipeline.md)
+#### 3. [Test the pipeline](how_to_test_pipeline.md)
 
 
 
