@@ -3,31 +3,30 @@
 Kevin Cho and Yoobin Kwak
 
 kevincho@bwh.harvard.edu
-
 yoobinkwak@gmail.com
 
 
 ## Contents
 - Introduction
-- Citation
 - Installation
-- Arranging data for the pipeline
+- Arranging the data for the pipeline
 - Running the ENIGMA CHR DTI Pipeline
 - Sharing outputs to other teams
+- Citation
 
 
 ## Introduction
 
-ENIGMA CHR DTI pipeline is a toolbox for analyzing diffusion weighted imaging (DWI) data developed for ENIGMA-CHR DTI project. The pipeline expects dicom files of a single DWI scan arranged in a required structure (decribed in "Arranging data for the pipeline") and automatically processes available data.
+ENIGMA CHR DTI pipeline is an automated toolbox for analyzing diffusion-weighted imaging (DWI) data developed for the ENIGMA-CHR DTI project. The pipeline expects Dicom files of a DWI session arranged in the required structure (described in "Arranging data for the pipeline") and automatically processes available data.
 
-The dicom files will be converted to a Nifti file, bval, and bvec file along with the BIDS sidecar json file. Then the following steps will be applied to each subject data.
+The Dicom files will be converted to a Nifti file, bval, and bvec file along with the BIDS sidecar json file using dcm2niix. Then the following steps will be applied to each subject data.
 - Gibbs unring (FSL)
 - FSL Eddy (6.0.4)
 - Tensor decomposition to create fractional anisotropy (FA), axial diffusivity (AD), mean diffusivity (MD), and radial diffusivity (RD) maps.
-- Skeletonization of the FA, AD, MD and RD maps using PNL-TBSS.
-- Extraction of mean diffusion measures in the major JHU bundles.
+- Skeletonization of the FA, AD, MD, and RD maps using PNL-TBSS.
+- Estimation of mean diffusion measures in the major JHU bundles.
 
-To increase the homogeneity of the diffusion acquisition parameters within the site, the pipeline curates the following dicom tags from all data, and highlight in the report if there is any deviation in dicom tags within a site.
+To increase the homogeneity of the diffusion acquisition parameters within site, the pipeline curates the following Dicom tags from all data and highlights in the report if there is any deviation in Dicom tags within a site.
 
 - SeriesDescription
 - ImageType
@@ -46,58 +45,63 @@ To increase the homogeneity of the diffusion acquisition parameters within the s
 - SoftwareVersions
 - SpacingBetweenSlices
 
-Although it's recommended to provide dicom data as the input to the pipeline, you can also provide diffusion files in the nifti format if your DWI data requires a specific dicom to nifti conversion or if the dicom files not available by some reason. You would need to provide DWI nifti file, bvector file, bvalue file in a structure that the pipeline expects. Pleaes make sure you are providing the raw nifti file without any preprocessing. If any of the three files is missing, the pipeline will raise an error. (See `Arranging data for the pipeline` section.) Please let the study coordinator know your situation, and the study coordinate will guide you.
+Although it's recommended to provide Dicom data as the input to the pipeline, you can also provide diffusion data in the nifti format if your DWI data requires a specific Dicom to nifti conversion or if the Dicom files not available by some reason. You would need to provide DWI nifti file, bvector and bvalue file in a structure that the pipeline expects. Please make sure you are providing the raw Nifti file without any preprocessing. The pipeline will raise an error if any of the three files are missing. (See `Arranging data for the pipeline` section.) Please let the study coordinator know about your situation, and the study coordinator will guide you through the process.
 
-The toolbox is deployed in a container, so as long as either Docker or Singularity is installed on the server, the toolbox should be functional regardless of the operating system. 
-Please note the pipeline does not support Apple Mac with M1 Chips yet, due to an issue with tensorflow installation on M1 Chip machines. Also, since this pipeline is specifically developed for ENIGMA-CHR DTI project, it does not support EPI distortion correction using reverse-encoding maps or field maps. If your data for ENIGMA-CHR project has multiple DWI series, blip-up / blip-down, fieldmaps, or other reverse-encoding diffusion scans, please reach out to the coordinating team.
+The toolbox is deployed in a container, so if either Docker or Singularity is installed on the server, the toolbox should be functional regardless of the operating system. 
+Please note the pipeline does not yet support Apple Mac with M1 Chips due to an issue with TensorFlow installation on M1 Chip machines. Also, since this pipeline is specifically developed for the ENIGMA-CHR DTI project, it does not support EPI distortion correction using reverse-encoding maps or field maps. If your data for the ENIGMA-CHR project has multiple DWI series, blip-up / blip-down, fieldmaps, or other reverse-encoding diffusion scans, please get in touch with the coordinating team.
 
-Please let the study coordinator know if you don't have powerful enough servers to process your diffusion data. The study coordinator will arrange a cloud server for you to run the pipeline.
-
-
-## Citation
-
-This toolbox uses the following softwares. Please cite them if you use this pipeline in your study.
-
-- [`dcm2niix`](https://github.com/rordenlab/dcm2niix)
-- [CNN based diffusion MRI brain segmentation tool](https://github.com/pnlbwh/CNN-Diffusion-MRIBrain-Segmentation)
-- [FSL (and FSL unring)](https://fsl.fmrib.ox.ac.uk/)
-- [ANTs](https://github.com/ANTsX/ANTs)
-- [PNL TBSS](https://github.com/pnlbwh/TBSS)
-- [`objPipe`](https://github.com/kcho/objPipe)
-- [`eddy-squeeze`](https://github.com/pnlbwh/eddy-squeeze)
-- [`nifti-snapshot`](https://github.com/pnlbwh/nifti-snapshot)
-
+Please let the study coordinator know if you need more powerful servers to process your diffusion data. The study coordinator will arrange a cloud server for you to run the pipeline.
 
 
 ## Installation
 
 ### with Docker
-1. Install and configure Docker Desktop
+
+Installing the pipeline with Docker would be a preferred option for the research centers with private computer servers with **sudo access**.
+
+1. Install Docker.
 
 - [Download Docker Desktop](https://www.docker.com/products/docker-desktop/)
-    - with at least 4 cores (12 cores preferably) and 4 GB RAM (16 GB preferably)
+    - configure Docker to have at least 4 cores (12 cores preferably) and 4 GB RAM (16 GB preferably)
 
 
 2. Download ENIGMA CHR DTI docker image.
 
-In terminal or power-shell, type
+In terminal or power-shell (as an administrator), type
 ```
 $ docker pull kcho/enigma-chr-pipeline
 ```
 
+This command will automatically download the pipeline including all the dependencies.
+
+3. [Test the pipeline](how_to_test_pipeline.md)
+
 
 ### with Singularity
+
+1. Install Singularity.
+
+If you can only use your institution's computation system for the analysis without sudo access,
+check with your institution's computation team to get the singularity installed.
+
+
+2. Download ENIGMA CHR DTI singularity image
+
+In terminal or power-shell, type
 ```
 $ singularity build enigma-chr-pipeline.simg docker://kcho/enigma-chr-pipeline
 ```
+
+This command will automatically download the pipeline including all the dependencies.
 
 
 3. [Test the pipeline](how_to_test_pipeline.md)
 
 
-## Arranging data for the pipeline
 
-### If you are providing dicom files to the pipeline
+## Arranging the data for the pipeline
+
+### Arrange your Dicom files as the following structure.
 
 ```
 /Users/kc244/enigma_chr_data  <-  it could be somewhere else
@@ -116,77 +120,25 @@ $ singularity build enigma-chr-pipeline.simg docker://kcho/enigma-chr-pipeline
 ```
 
 
-### If you are providing nifti files to the pipeline as the raw input
-
-```
-/Users/kc244/enigma_chr_data  <-  it could be somewhere else
-└── rawdata
-    ├── subject_01
-    │   ├── subject_01.nii.gz
-    │   ├── subject_01.bvec
-    │   └── subject_01.bval
-    ├── subject_02
-    │   ├── subject_02.nii.gz
-    │   ├── subject_02.bvec
-    │   └── subject_02.bval
-    ├── ...
-    └── subject_XX
-```
+If you are providing nifti files to the pipeline as the raw input, [click here](nifti_input.md)
 
 
 ## Running the ENIGMA CHR DTI Pipeline
 
-Once you have your dicom files arranged for each subject, run following command
+Once you have your dicom files arranged for each subject, run following command in terminal or power-shell (as an administrator) 
 
 ```
-$ enigma_chr_dir=/Users/kc244/enigma_chr_data   # set this to your data location
-$ docker run -it -v ${enigma_chr_dir}:/data kcho/enigma-chr-pipeline
+# use your data location
+$ docker run -it -v /Users/kc244/enigma_chr_data:/data kcho/enigma-chr-pipeline
 ```
 
 For singularity,
 ```
-$ enigma_chr_dir=/Users/kc244/enigma_chr_data   # set this to your data location
-$ singularity run -e -B ${enigma_chr_dir}:/data:rw enigma-chr-pipeline.simg
+# use your data location
+$ singularity run -e -B /Users/kc244/enigma_chr_data:/data:rw enigma-chr-pipeline.simg
 ```
 
-**The pipeline is expected to take about 2~3 hours to process a single subject data.**
-
-
-### If you are providing nifti data to the pipeline, follow the steps below.
-
-```
-$ enigma_chr_dir=/Users/kc244/enigma_chr_data   # set this to your data location
-$ docker run -it \
-    -v ${enigma_chr_dir}:/data \
-    enigma_chr_pipeline xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data --nifti_input
-
-# for singularity
-$ singularity shell -e -B ${enigma_chr_dir}:/data \
-    enigma_chr_pipeline.simg xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data --nifti_input
-```
-
-### If you get memory error, follow the steps below.
-
-#### Step 1.
-
-```
-# docker
-docker run -it -v ${data_location}:/data enigma-chr-pipeline xvfb-run -a /opt/miniconda-latest/bin/python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_subjects.py -b /data
-
-# singularity
-singularity exec -B ${data_location}:/data enigma-chr-pipeline.simg xvfb-run -a /opt/miniconda-latest/bin/python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_subjects.py -b /data
-```
-
-#### Step 2.
- 
-```
-# docker
-docker run -it -v ${data_location}:/data enigma-chr-pipeline xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_study.py -b /data
-
-# singularity
-singularity exec -B ${data_location}:/data enigma-chr-pipeline.simg xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_study.py -b /data
-
-```
+**The pipeline is expected to take about 2~3 hours to process a single subject data.** If you get memory error, follow the steps in [this link](memory_error.md). 
 
 
 ## Sharing outputs to other teams
@@ -240,16 +192,18 @@ Here is the list of files collected by `collect_outputs.py`
             └── subject_02.pdf
 ```
 
+Then, upload the zip file to the Dropbox link share to you by the study coordinator.
 
-## Enter into the image shell
 
-```
-$ enigma_chr_dir=/Users/kc244/enigma_chr_data   # set this to your data location
-$ docker run -it \
-    -v ${enigma_chr_dir}:/data \
-    enigma_chr_pipeline /bin/bash
+## Citation
 
-# for singularity
-$ singularity shell -e -B ${enigma_chr_dir}:/data \
-    enigma_chr_pipeline.simg /bin/bash
-```
+This toolbox uses the following softwares. Please cite them if you use this pipeline in your study.
+
+- [`dcm2niix`](https://github.com/rordenlab/dcm2niix)
+- [CNN based diffusion MRI brain segmentation tool](https://github.com/pnlbwh/CNN-Diffusion-MRIBrain-Segmentation)
+- [FSL (and FSL unring)](https://fsl.fmrib.ox.ac.uk/)
+- [ANTs](https://github.com/ANTsX/ANTs)
+- [PNL TBSS](https://github.com/pnlbwh/TBSS)
+- [`objPipe`](https://github.com/kcho/objPipe)
+- [`eddy-squeeze`](https://github.com/pnlbwh/eddy-squeeze)
+- [`nifti-snapshot`](https://github.com/pnlbwh/nifti-snapshot)
