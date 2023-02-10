@@ -198,6 +198,7 @@ class EnigmaChrSubjectNiftiDir(EnigmaChrSubjectDicomDir):
                          check_run: bool = False,
                          test: bool = False):
         '''Subject-wise pipeline'''
+        print('hahhah')
         # register 'no dicom input' to self.dicom_header_series attr
         self.no_dicom_info(force)
 
