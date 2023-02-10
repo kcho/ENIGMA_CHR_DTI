@@ -203,11 +203,11 @@ Then, upload the zip file to the Dropbox link share to you by the study coordina
 
 This toolbox uses the following softwares. Please cite them if you use this pipeline in your study.
 
-- [`dcm2niix`](https://github.com/rordenlab/dcm2niix)
-- [CNN based diffusion MRI brain segmentation tool](https://github.com/pnlbwh/CNN-Diffusion-MRIBrain-Segmentation)
-- [FSL (and FSL unring)](https://fsl.fmrib.ox.ac.uk/)
-- [ANTs](https://github.com/ANTsX/ANTs)
-- [PNL TBSS](https://github.com/pnlbwh/TBSS)
-- [`objPipe`](https://github.com/kcho/objPipe)
-- [`eddy-squeeze`](https://github.com/pnlbwh/eddy-squeeze)
-- [`nifti-snapshot`](https://github.com/pnlbwh/nifti-snapshot)
+- [`dcm2niix`](https://github.com/rordenlab/dcm2niix), version 1.0.20220720
+- [CNN based diffusion MRI brain segmentation tool](https://github.com/pnlbwh/CNN-Diffusion-MRIBrain-Segmentation), f08d79b
+- [FSL (and FSL unring)](https://fsl.fmrib.ox.ac.uk/), version 6.0.5
+- [ANTs](https://github.com/ANTsX/ANTs), v2.4.3, 871cad0
+- [PNL TBSS](https://github.com/pnlbwh/TBSS), f95982d
+- [`objPipe`](https://github.com/kcho/objPipe), 1bd277b
+- [`eddy-squeeze`](https://github.com/pnlbwh/eddy-squeeze), c25b266
+- [`nifti-snapshot`](https://github.com/pnlbwh/nifti-snapshot), 771cb8d
