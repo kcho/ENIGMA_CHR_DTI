@@ -304,6 +304,7 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         self.rawdata_root_check = self.rawdata_root.is_dir()
 
         if raw_data_type == 'dicom':
+            print(raw_data_type)
             self.subjects = list(sorted([x for x in self.source_dir.glob('*')
                 if not x.name.startswith('.')]))
         
@@ -322,6 +323,7 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
                                     in self.subjects]
 
         else:  # Nifti input
+            print(raw_data_type)
             self.subjects = list(sorted([x for x in self.rawdata_root.glob('*')
                 if not x.name.startswith('.')]))
 
