@@ -55,7 +55,7 @@ Please let the study coordinator know if you need more powerful servers to proce
 
 ## Installation
 
-### > with Docker
+### Installation with Docker
 
 Installing the pipeline through Docker would be a preferred option for the research centers with **sudo (administrator) access** on their computing system.
 
@@ -77,7 +77,7 @@ This command will automatically download the pipeline including all the dependen
 #### 3. [Test the pipeline](how_to_test_pipeline.md)
 
 
-> ### with Singularity
+### Installation with Singularity
 
 #### 1. Install Singularity.
 
