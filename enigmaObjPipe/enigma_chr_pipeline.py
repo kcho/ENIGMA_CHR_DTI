@@ -433,7 +433,6 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
                     drop=True)
 
         error_df = error_df[~error_df.error.isnull()]
-        print(error_df)
 
         if len(error_df) > 0:
             error_files = self.root_dir.glob('cases_with_error_v*.csv')
