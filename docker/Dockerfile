@@ -1,5 +1,5 @@
 # Use UBUNTU Bionic
-FROM ubuntu:bionic-20200112 as builder
+FROM ubuntu:bionic-20230126 as builder
 
 # Installing FSL
 ENV FSLDIR="/opt/fsl-6.0.5" \
@@ -10,7 +10,6 @@ ENV FSLDIR="/opt/fsl-6.0.5" \
     FSLWISH="/opt/fsl-6.0.5/bin/fslwish" \
     FSLLOCKDIR="" \
     FSLGECUDAQ="cuda.q"
-
 
 RUN apt-get update -qq \
     && apt-get install -y -q --no-install-recommends \
@@ -38,37 +37,19 @@ RUN apt-get update -qq \
            wget \
     && rm -rf /var/lib/apt/lists/*
 
-# Installing freesurfer
-#RUN curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.2.0/freesurfer-linux-ubuntu18_amd64-7.2.0.tar.gz \
-#￼    | tar zxv --no-same-owner -C /opt
-
-## Simulate SetUpFreeSurfer.sh
-#ENV FSL_DIR="/opt/fsl-6.0.4" \
-    #OS="Linux" \
-    #FS_OVERRIDE=0 \
-    #FIX_VERTEX_AREA="" \
-    #FSF_OUTPUT_FORMAT="nii.gz" \
-    #FREESURFER_HOME="/opt/freesurfer"
-#ENV SUBJECTS_DIR="$FREESURFER_HOME/subjects" \
-    #FUNCTIONALS_DIR="$FREESURFER_HOME/sessions" \
-    #MNI_DIR="$FREESURFER_HOME/mni" \
-    #LOCAL_DIR="$FREESURFER_HOME/local" \
-    #MINC_BIN_DIR="$FREESURFER_HOME/mni/bin" \
-    #MINC_LIB_DIR="$FREESURFER_HOME/mni/lib" \
-    #MNI_DATAPATH="$FREESURFER_HOME/mni/data"
-#ENV PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
-    #MNI_PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
-    #PATH="$FREESURFER_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH"
-#RUN apt-get update
-#RUN apt-get install python2.7 -y
+RUN apt-get update
 
 RUN echo "Downloading FSL ..." \
     && mkdir -p /opt/fsl-6.0.5 \
     && curl -fL \
-        https://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-6.0.5-centos7_64.tar.gz | tar -xz -C /opt/fsl-6.0.5 --strip-components 1
+        https://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-6.0.5-centos7_64.tar.gz | \
+        tar -xz -C /opt/fsl-6.0.5 --strip-components 1
+
+RUN sed -i 's/exit\ 4/echo\ "ha"/g' \
+    /opt/fsl-6.0.5/etc/fslconf/fslpython_install.sh
 
 RUN echo "Installing FSL conda environment ..." \
-    && bash /opt/fsl-6.0.5/etc/fslconf/fslpython_install.sh -f /opt/fsl-6.0.5; exit 0
+    && bash /opt/fsl-6.0.5/etc/fslconf/fslpython_install.sh -f /opt/fsl-6.0.5
 
 # Installing ANTS
 RUN echo "Installing ANTS ..." \
@@ -152,8 +133,12 @@ RUN apt-get update -qq \
     && rm -rf ~/.cache/pip/*
 
 
-# clone TBSS
+# python 3.9
+RUN conda create --name enigma-env python=3.9 -y
+SHELL ["conda", "run", "-n", "enigma-env", "/bin/bash", "-c"]
 RUN conda install -c conda-forge dipy
+#RUN pip install nibabel
+#RUN pip install dipy
 RUN git clone https://github.com/kcho/TBSS /opt/tbss
 
 ENV FSLDIR="/opt/fsl-6.0.5" \
@@ -201,7 +186,7 @@ RUN pip install -r /opt/ENIGMA_CHR_DTI/requirements.txt
 # dcm2niix
 RUN mkdir /opt/dcm2niix \
     && cd /opt/dcm2niix \
-    && wget https://github.com/rordenlab/dcm2niix/releases/download/v1.0.20211006/dcm2niix_lnx.zip \
+    && wget https://github.com/rordenlab/dcm2niix/releases/download/v1.0.20220720/dcm2niix_lnx.zip \
     && unzip dcm2niix_lnx.zip
 
 ENV PATH="/opt/dcm2niix:$PATH"
@@ -218,18 +203,8 @@ ENV enigma_data_dir="/opt/tbss/data/enigmaDTI"
 
 # check softwares
 RUN dipy_gibbs_ringing -h
-
-
 WORKDIR /data
-
-RUN pwd
-RUN pwd
-RUN pwd
-RUN pwd
-RUN pwd
-RUN pwd
-RUN pwd
 RUN apt-get install -y x11-apps
-RUN cd /opt/ENIGMA_CHR_DTI && git pull
 
+RUN cd /opt/ENIGMA_CHR_DTI && git pull
 CMD xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data
