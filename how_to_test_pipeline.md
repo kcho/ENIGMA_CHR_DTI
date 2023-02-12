@@ -46,4 +46,5 @@ singularity run -e -B ${test_data_dir}:/data:rw enigma-chr-pipeline.simg collect
 
 ## 3. Check outputs
 
+You can safely ignore the message "warning: chol(): given matrix is not symmetric".
 The test above will create a zip file, summarizing the result of the ENIGMA CHR DTI pipeline.
