@@ -2,12 +2,12 @@
 FROM ubuntu:bionic-20230126 as builder
 
 # Installing FSL
-ENV FSLDIR="/opt/fsl-6.0.5" \
-    PATH="/opt/fsl-6.0.5/bin:$PATH" \
+ENV FSLDIR="/opt/fsl-6.0.6" \
+    PATH="/opt/fsl-6.0.6/bin:$PATH" \
     FSLOUTPUTTYPE="NIFTI_GZ" \
     FSLMULTIFILEQUIT="TRUE" \
-    FSLTCLSH="/opt/fsl-6.0.5/bin/fsltclsh" \
-    FSLWISH="/opt/fsl-6.0.5/bin/fslwish" \
+    FSLTCLSH="/opt/fsl-6.0.6/bin/fsltclsh" \
+    FSLWISH="/opt/fsl-6.0.6/bin/fslwish" \
     FSLLOCKDIR="" \
     FSLGECUDAQ="cuda.q"
 
@@ -39,17 +39,9 @@ RUN apt-get update -qq \
 
 RUN apt-get update
 
-RUN echo "Downloading FSL ..." \
-    && mkdir -p /opt/fsl-6.0.5 \
-    && curl -fL \
-        https://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-6.0.5-centos7_64.tar.gz | \
-        tar -xz -C /opt/fsl-6.0.5 --strip-components 1
-
-RUN sed -i 's/exit\ 4/echo\ "ha"/g' \
-    /opt/fsl-6.0.5/etc/fslconf/fslpython_install.sh
-
-RUN echo "Installing FSL conda environment ..." \
-    && bash /opt/fsl-6.0.5/etc/fslconf/fslpython_install.sh -f /opt/fsl-6.0.5
+RUN wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslconda/releases/fslinstaller.py
+RUN apt-get update && apt-get install python -y
+RUN python fslinstaller.py -d /opt/fsl-6.0.6
 
 # Installing ANTS
 RUN echo "Installing ANTS ..." \
@@ -98,6 +90,7 @@ RUN apt-get update \
 ENV CONDA_DIR="/opt/miniconda-latest" \
     PATH="/opt/miniconda-latest/bin:$PATH"
 
+RUN pwd
 RUN apt-get update -qq \
     && apt-get install -y -q --no-install-recommends \
            bzip2 \
@@ -111,7 +104,7 @@ RUN apt-get update -qq \
     && export PATH="/opt/miniconda-latest/bin:$PATH" \
     && echo "Downloading Miniconda installer ..." \
     && conda_installer="/tmp/miniconda.sh" \
-    && curl -fsSL -o "$conda_installer" https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+    && curl -fsSL -o "$conda_installer" https://repo.anaconda.com/miniconda/Miniconda3-py39_23.1.0-1-Linux-x86_64.sh \
     && bash "$conda_installer" -b -p /opt/miniconda-latest \
     && rm -f "$conda_installer" \
     && conda update -yq -nbase conda \
@@ -134,19 +127,21 @@ RUN apt-get update -qq \
 
 
 # python 3.9
-RUN conda create --name enigma-env python=3.9 -y
-SHELL ["conda", "run", "-n", "enigma-env", "/bin/bash", "-c"]
-RUN conda install -c conda-forge dipy
-#RUN pip install nibabel
-#RUN pip install dipy
+#RUN conda create -n enigma-env python=3.9 -y
+#SHELL ["conda", "run", "-n", "enigma-env", "/bin/bash", "-c"]
+ENV PATH="/opt/miniconda-latest/bin:$PATH"
+RUN pip install numpy
+RUN pip install scikit-image==0.16.2
+RUN pip install nibabel
+RUN pip install dipy
 RUN git clone https://github.com/kcho/TBSS /opt/tbss
 
-ENV FSLDIR="/opt/fsl-6.0.5" \
-    PATH="/opt/fsl-6.0.5/bin:$PATH" \
+ENV FSLDIR="/opt/fsl-6.0.6" \
+    PATH="/opt/fsl-6.0.6/bin:$PATH" \
     FSLOUTPUTTYPE="NIFTI_GZ" \
     FSLMULTIFILEQUIT="TRUE" \
-    FSLTCLSH="/opt/fsl-6.0.5/bin/fsltclsh" \
-    FSLWISH="/opt/fsl-6.0.5/bin/fslwish" \
+    FSLTCLSH="/opt/fsl-6.0.6/bin/fsltclsh" \
+    FSLWISH="/opt/fsl-6.0.6/bin/fslwish" \
     FSLLOCKDIR="" \
     FSLMACHINELIST="" \
     FSLREMOTECALL="" \
@@ -156,10 +151,8 @@ RUN /bin/bash /opt/tbss/install.sh setup
 
 # eddy-squeeze
 #RUN git clone https://github.com/pnlbwh/eddy-squeeze /opt/eddy-squeeze
-RUN pwd
 RUN pip install eddy-squeeze==1.0.9
 RUN pip install nifti-snapshot==0.1.19
-
 
 # clone https://github.com/pnlbwh/CNN-Diffusion-MRIBrain-Segmentation
 RUN git clone https://github.com/kcho/CNN-Diffusion-MRIBrain-Segmentation /opt/CNN-Diffusion-MRIBrain-Segmentation
@@ -167,7 +160,6 @@ RUN git clone https://github.com/kcho/CNN-Diffusion-MRIBrain-Segmentation /opt/C
 RUN pip install tensorflow==2.9.0
 RUN pip install keras==2.9.0
 RUN pip install prompt-toolkit==2.0.1
-RUN pip install scikit-image==0.16.2
 RUN pip install git+https://github.com/pnlbwh/conversion.git
 RUN cd /opt/CNN-Diffusion-MRIBrain-Segmentation && \
     wget https://github.com/pnlbwh/CNN-Diffusion-MRIBrain-Segmentation/releases/download/v0.3/model_folder.tar.gz && \
@@ -205,10 +197,9 @@ ENV enigma_data_dir="/opt/tbss/data/enigmaDTI"
 RUN dipy_gibbs_ringing -h
 WORKDIR /data
 RUN apt-get install -y x11-apps
-
-RUN pwd
-RUN pwd
-RUN pwd
-RUN cd /opt/ENIGMA_CHR_DTI && git pull
-ENV PYTHONUNBUFFERED=1
-CMD xvfb-run -a python -u /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data
+#RUN cd /opt/ENIGMA_CHR_DTI && git pull
+#RUN sed -i "s/DISPLAY=:\$SERVERNUM XAUTHORITY=\$AUTHFILE \"\$@\" 2>&1/DISPLAY=:\$SERVERNUM XAUTHORITY=\$AUTHFILE \"\$@\"/" /usr/bin/xvfb-run
+#ENV PYTHONUNBUFFERED=1
+#SHELL ["conda", "run", "-n", "enigma-env", "/bin/bash", "-c"]
+RUN conda install -c conda-forge dipy
+CMD cd /opt/ENIGMA_CHR_DTI && git pull; xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data
