@@ -490,7 +490,7 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         pool.close()
         pool.join()
 
-        print(results)
+        print([x.get() for x in results])
         processing_failed_subject_classes = [1, 2, 3, 4]
             # try:
                 # subject.subject_pipeline(force=force,
