@@ -11,6 +11,7 @@
 * [Arranging the data for the pipeline](#arranging-the-data-for-the-pipeline)
 * [Running the ENIGMA CHR DTI Pipeline](#running-the-enigma-chr-dti-pipeline)
 * [Sharing outputs to other teams](#sharing-outputs-to-other-teams)
+* [Troubleshooting](#troubleshooting)
 * [Citation](#citation)
 
 
@@ -27,7 +28,7 @@ The Dicom files will be converted to a Nifti file, bval, and bvec file along wit
 
 To increase the homogeneity of the diffusion acquisition parameters within site, the pipeline curates the following Dicom tags from all data and highlights in the report if there is any deviation in Dicom tags within a site.
 
-- SeriesDescription
+ SeriesDescription
 - ImageType
 - AcquisitionMatrix
 - DeviceSerialNumber
@@ -197,6 +198,12 @@ Here is the list of files collected by `collect_outputs.py`
 ```
 
 Then, upload the zip file to the Dropbox link share to you by the study coordinator.
+
+
+## Troubleshooting
+
+[Click here](troubleshooting.md) for troubleshooting.
+
 
 
 ## Citation
