@@ -17,6 +17,7 @@ from enigmaObjPipe.diffusion.dwi import DwiPipe, DwiToolsStudy
 from enigmaObjPipe.diffusion.dwi import MissingBvalException, \
         MissingBvecException, MissingDwiException, WrongBvalException, \
         WrongBvecException, WrongDwiException
+from enigmaObjPipe.diffusion.masking import MaskingPipe
 from enigmaObjPipe.diffusion.eddy import EddyPipe
 from enigmaObjPipe.diffusion.tbss import StudyTBSS
 from enigmaObjPipe.denoising.gibbs import NoiseRemovalPipe
@@ -30,8 +31,8 @@ class ProcessingFailure(Exception):
 
 
 class EnigmaChrSubjectDicomDir(
-        DicomTools, RunCommand, DwiPipe, NoiseRemovalPipe, EddyPipe,
-        Snapshot):
+        DicomTools, RunCommand, DwiPipe, NoiseRemovalPipe, MaskingPipe,
+        EddyPipe, Snapshot):
     def __init__(self, dicom_dir):
         self.dicom_dir = Path(dicom_dir)
         self.subject_name = dicom_dir.name
@@ -113,6 +114,9 @@ class EnigmaChrSubjectDicomDir(
         self.snapshot_first_b0(self.diff_dwi_unring, 'Unring DWI', force)
         self.snapshot_diff_first_b0(self.diff_dwi_unring, self.diff_raw_dwi,
                                     'Unring DWI', 'Raw DWI', force)
+
+        # 5. Masking
+        self.cnn_brain_masking(force=force)
 
     def subject_pipeline_part2(self,
                                nproc: int = 1,
@@ -224,6 +228,9 @@ class EnigmaChrSubjectNiftiDir(EnigmaChrSubjectDicomDir):
         self.snapshot_first_b0(self.diff_dwi_unring, 'Unring DWI', force)
         self.snapshot_diff_first_b0(self.diff_dwi_unring, self.diff_raw_dwi,
                                     'Unring DWI', 'Raw DWI', force)
+
+        # 5. Masking
+        self.cnn_brain_masking(force=force)
 
 
 def run_subject_pipeline_parallel(subject: EnigmaChrSubjectDicomDir,
@@ -445,8 +452,8 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         processing_failed_subject_classes = []
         for subject in self.subject_classes:
             r = pool.apply_async(run_subject_pipeline_parallel,
-                                             (subject, force, test,),
-                                             callback=mycallback)
+                                 (subject, force, test,),
+                                 callback=mycallback)
             results.append(r)
 
         for r in results:
