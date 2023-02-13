@@ -39,7 +39,7 @@ class StudyTBSS(object):
                 f.write(subject.subject_name+'\n')
         # self.logger.info('TBSS input caselist is written')
 
-    def execute_tbss(self, force: bool = False):
+    def execute_tbss(self, force: bool = False, nproc: int = 4):
         command = f'{self.tbss_all} \
                 --modality {",".join(self.tbss_all_modalities_str)} \
                 --input {self.tbss_all_input_csv} \
@@ -47,7 +47,7 @@ class StudyTBSS(object):
                 --outDir {self.tbss_all_out_dir} \
                 --enigma \
                 --space {os.environ["FSLDIR"]}/data/standard/FMRIB58_FA_1mm.nii.gz \
-                -n -1'
+                -n {nproc}'
 
         self.completed_tbss = (self.tbss_stats_dir / 'FA_combined_roi.csv'
                 ).is_file()

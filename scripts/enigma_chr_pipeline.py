@@ -11,8 +11,8 @@ def parse_args(argv):
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description='ENIGMA CHR DTI pipeline')
 
-    argparser.add_argument("--bids_root", "-b",
-                           required=True,
+    argparser.add_argument("--bids_root", "-b", type=str,
+                           default='/data',
                            help='BIDS root of the data')
 
     argparser.add_argument("--nproc", "-n",
