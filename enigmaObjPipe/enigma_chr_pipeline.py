@@ -492,6 +492,8 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         pool.join()
 
         self.subject_classes = [x.get() for x in results]
+        print(self.subject_classes)
+        print([x.preproc_completed for x in self.subject_classes])
         processing_failed_subject_classes = [x for x in self.subject_classes
                                              if x.preproc_completed]
             # try:
