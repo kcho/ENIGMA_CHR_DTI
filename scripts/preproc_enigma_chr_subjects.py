@@ -83,4 +83,7 @@ if __name__ == '__main__':
             f'{subject.site}.html'
 
         subject.subject_pipeline(force=args.force)
+        subject.subject_pipeline(force=args.force)
+        subject.subject_pipeline_part1(force=args.force)
+        subject.subject_pipeline_part2(force=args.force)
         del subject

@@ -86,7 +86,6 @@ class EnigmaChrSubjectDicomDir(
         self.web_summary_file = self.web_summary_dir / \
                 f'{self.subject_name}.html'
 
-
     def subject_pipeline(self,
                          nproc: int = 1,
                          force: bool = False,
@@ -105,6 +104,11 @@ class EnigmaChrSubjectDicomDir(
         if check_run:
             return
 
+    def subject_pipeline_part1(self,
+                               nproc: int = 1,
+                               force: bool = False,
+                               check_run: bool = False,
+                               test: bool = False):
         self.snapshot_first_b0(self.diff_raw_dwi, 'Raw DWI', force)
                       
         # 4. Diffusion preprocessing
@@ -218,20 +222,6 @@ class EnigmaChrSubjectNiftiDir(EnigmaChrSubjectDicomDir):
 
         if check_run:
             return
-
-        self.snapshot_first_b0(self.diff_raw_dwi, 'Raw DWI', force)
-                      
-        # 4. Diffusion preprocessing
-        # 4a. gibbs unring
-        print('Gibbs Unring')
-        self.run_gibbs_unring(self.diff_raw_dwi, self.diff_dwi_unring, force)
-        self.snapshot_first_b0(self.diff_dwi_unring, 'Unring DWI', force)
-        self.snapshot_diff_first_b0(self.diff_dwi_unring, self.diff_raw_dwi,
-                                    'Unring DWI', 'Raw DWI', force)
-
-        # 5. Masking
-        self.cnn_brain_masking(force=force)
-
 
 def run_subject_pipeline_parallel(subject: EnigmaChrSubjectDicomDir,
                                   force: bool = False,
@@ -445,7 +435,7 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         # Actual processing
         processing_failed_subject_classes = []
         for subject in self.subject_classes:
-            subject.subject_pipeline(force=force, test=test)
+            subject.subject_pipeline_part1(force=force, test=test)
 
         pool = Pool(nproc)
         results = []
