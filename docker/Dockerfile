@@ -182,7 +182,6 @@ RUN mkdir /opt/dcm2niix \
     && unzip dcm2niix_lnx.zip
 
 ENV PATH="/opt/dcm2niix:$PATH"
-RUN /opt/dcm2niix/dcm2niix -h
 
 
 # unring
@@ -197,10 +196,8 @@ ENV enigma_data_dir="/opt/tbss/data/enigmaDTI"
 RUN dipy_gibbs_ringing -h
 WORKDIR /data
 RUN apt-get install -y x11-apps
-#RUN cd /opt/ENIGMA_CHR_DTI && git pull
-#RUN sed -i "s/DISPLAY=:\$SERVERNUM XAUTHORITY=\$AUTHFILE \"\$@\" 2>&1/DISPLAY=:\$SERVERNUM XAUTHORITY=\$AUTHFILE \"\$@\"/" /usr/bin/xvfb-run
-#ENV PYTHONUNBUFFERED=1
-#SHELL ["conda", "run", "-n", "enigma-env", "/bin/bash", "-c"]
 RUN conda install -c conda-forge dipy
+
+# nibabel downgrade to a previous version to make it work with PNL-TBSS
 RUN pip install nibabel==4.0.2
 CMD cd /opt/ENIGMA_CHR_DTI && git pull; xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data

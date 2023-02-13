@@ -9,7 +9,7 @@ from eddy_squeeze.eddy_squeeze_lib.eddy_present import EddyFigure
 
 
 class EddyPipe(object):
-    def eddy(self, force: bool = False, test: bool = False):
+    def eddy(self, nproc: int = 1, force: bool = False, test: bool = False):
         '''FSL Eddy'''
         # index
 
@@ -30,7 +30,9 @@ class EddyPipe(object):
                         str(self.diff_dwi_unring).split('.')[0] + '.bval')
             shutil.copy(self.diff_raw_bvec,
                         str(self.diff_dwi_unring).split('.')[0] + '.bvec')
-            self.CNN_brain_extraction(self.diff_dwi_unring, self.diff_mask)
+            self.CNN_brain_extraction(self.diff_dwi_unring,
+                                      self.diff_mask,
+                                      nproc=nproc)
 
         data_img = nb.load(self.diff_dwi_unring)
         index_array = np.tile(1, data_img.shape[-1])
@@ -49,7 +51,8 @@ class EddyPipe(object):
                 f.write(acqp_line)
 
         # eddy_command
-        eddy_command = f'OMP_NUM_THREADS={self.omp_num_threads} {self.eddy_openmp} \
+
+        eddy_command = f'OMP_NUM_THREADS={nproc} {self.eddy_openmp} \
             --imain={self.diff_dwi_unring} \
             --mask={self.diff_mask} \
             --index={index_loc} \

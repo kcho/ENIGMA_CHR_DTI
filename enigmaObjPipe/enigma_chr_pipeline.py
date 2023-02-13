@@ -3,6 +3,7 @@ import sys
 import os
 import re
 import pandas as pd
+from multiprocessing import Pool
 
 from enigmaObjPipe.utils.paths import read_objPipe_config
 from enigmaObjPipe.utils.dicom import DicomTools, DicomToolsStudy
@@ -86,6 +87,7 @@ class EnigmaChrSubjectDicomDir(
 
 
     def subject_pipeline(self,
+                         nproc: int = 1,
                          force: bool = False,
                          check_run: bool = False,
                          test: bool = False):
@@ -118,7 +120,7 @@ class EnigmaChrSubjectDicomDir(
 
         # 4c. run Eddy
         print('Running Eddy - may take 1~2 hours')
-        self.eddy(force, test)
+        self.eddy(nproc=nproc, force=force, test=test)
         self.snapshot_first_b0(self.diff_mask, 'mask', force)
         self.snapshot_first_b0(self.diff_ep.with_suffix('.nii.gz'),
                                'Eddy DWI', force)
@@ -194,6 +196,7 @@ class EnigmaChrSubjectNiftiDir(EnigmaChrSubjectDicomDir):
         EnigmaChrSubjectDicomDir.__init__(self, dicom_dir_missing)
 
     def subject_pipeline(self,
+                         nproc: int = 1,
                          force: bool = False,
                          check_run: bool = False,
                          test: bool = False):
@@ -223,7 +226,7 @@ class EnigmaChrSubjectNiftiDir(EnigmaChrSubjectDicomDir):
 
         # 4c. run Eddy
         print('Running Eddy - may take 1~2 hours')
-        self.eddy(force, test)
+        self.eddy(nproc=nproc, force=force, test=test)
         self.snapshot_first_b0(self.diff_mask, 'mask', force)
         self.snapshot_first_b0(self.diff_ep.with_suffix('.nii.gz'),
                                'Eddy DWI', force)
@@ -259,6 +262,17 @@ class EnigmaChrSubjectNiftiDir(EnigmaChrSubjectDicomDir):
         create_subject_summary(self, self.web_summary_file)
 
         self.preproc_completed = True
+
+
+def run_subject_pipeline_parallel(subject: EnigmaChrSubjectDicomDir,
+                                  force: bool = False,
+                                  test: bool = False):
+    try:
+        subject.subject_pipeline(nproc=1, force=force, test=test)
+        return True
+    except:
+        return False
+
 
 
 class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
@@ -363,8 +377,11 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
 
         self.tbss_all = subject.tbss_all
 
-    def project_pipeline(self, force: bool = False, test: bool = False):
-        '''Study wise pipeline'''
+    def project_pipeline(self,
+                         force: bool = False,
+                         test: bool = False,
+                         nproc: int = 4):
+        print('''Study wise pipeline''')
 
         # Run subject level preprocessing
         error_df = pd.DataFrame(columns=['subject', 'error'])
@@ -453,16 +470,27 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
             raise PartialDataCases
 
         # Actual processing
+        pool = Pool(nproc)
+        results = []
         processing_failed_subject_classes = []
         for subject in self.subject_classes:
-            error_df_tmp = pd.DataFrame(
-                    {'subject': [subject.subject_name]})
-            try:
-                subject.subject_pipeline(force=force,
-                                         test=test)
-            except:
-                processing_failed_subject_classes.append(subject)
-                print(f'{subject.name}: raised processing error')
+            # error_df_tmp = pd.DataFrame(
+                    # {'subject': [subject.subject_name]})
+            r = pool.apply_async(run_subject_pipeline_parallel,
+                                 (subject, force, test,))
+            results.append(r)
+
+        for r in results:
+            r.wait()
+
+        print(results)
+        processing_failed_subject_classes = [1, 2, 3, 4]
+            # try:
+                # subject.subject_pipeline(force=force,
+                                         # test=test)
+            # except:
+                # processing_failed_subject_classes.append(subject)
+                # print(f'{subject.name}: raised processing error')
 
         if len(processing_failed_subject_classes) > 0:
             print(f'{len(processing_failed_subject_classes)} case(s) failed '

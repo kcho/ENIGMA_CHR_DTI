@@ -122,7 +122,10 @@ class DwiExtraction(object):
 
 
 class DwiPipe(object):
-    def CNN_brain_extraction(self, input_file: Path, output_file: Path):
+    def CNN_brain_extraction(self,
+                             input_file: Path,
+                             output_file: Path,
+                             nproc: int = 1):
         temp = tempfile.NamedTemporaryFile(mode='w+t', suffix='.txt')
 
         try:
@@ -132,7 +135,7 @@ class DwiPipe(object):
             command = f'{self.cnn_dms}/pipeline/dwi_masking.py \
                 -i {temp.name} \
                 -f {self.cnn_dms}/model_folder \
-                -nproc 5'
+                -nproc {nproc}'
 
             self.run(command)
             out_mask = input_file.parent / (input_file.name.split('.')[0] + 
