@@ -15,6 +15,11 @@ def parse_args(argv):
                            required=True,
                            help='BIDS root of the data')
 
+    argparser.add_argument("--nproc", "-n",
+                           default=4,
+                           help='Number of threads to use in parallel '
+                                'processing')
+
     argparser.add_argument("--site", "-s",
                            default=None,
                            help='Name of the study site')
@@ -42,6 +47,6 @@ if __name__ == '__main__':
                                         site=args.site)
 
     if len(enigmaChrStudy.subjects) >= 1:
-        enigmaChrStudy.project_pipeline(test=args.test)
+        enigmaChrStudy.project_pipeline(test=args.test, nproc=args.nproc)
     else:
         print(f'No data detected under {args.bids_root}')

@@ -494,12 +494,6 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         self.subject_classes = [x.get() for x in results]
         processing_failed_subject_classes = [x for x in self.subject_classes
                                              if not x.preproc_completed]
-            # try:
-                # subject.subject_pipeline(force=force,
-                                         # test=test)
-            # except:
-                # processing_failed_subject_classes.append(subject)
-                # print(f'{subject.name}: raised processing error')
 
         if len(processing_failed_subject_classes) > 0:
             print(f'{len(processing_failed_subject_classes)} case(s) failed '
