@@ -269,9 +269,10 @@ def run_subject_pipeline_parallel(subject: EnigmaChrSubjectDicomDir,
                                   test: bool = False):
     try:
         subject.subject_pipeline(nproc=1, force=force, test=test)
-        return True
     except:
-        return False
+        pass
+
+    return subject
 
 
 def mycallback(x):
@@ -490,9 +491,9 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         pool.close()
         pool.join()
 
-        print([x.get() for x in results])
-        processing_failed_subject_classes = [x for x in results
-                                             if x.get() == False]
+        self.subject_classes = [x.get() for x in results]
+        processing_failed_subject_classes = [x for x in self.subject_classes
+                                             if x.preproc_completed]
             # try:
                 # subject.subject_pipeline(force=force,
                                          # test=test)
@@ -505,8 +506,8 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
                   'processing. Please check the log file.')
             raise ProcessingFailure
 
-        for subject in self.subject_classes:
-            subject.subject_pipeline(nproc=1, force=False, test=False)
+        # for subject in self.subject_classes:
+            # subject.subject_pipeline(nproc=1, force=False, test=False)
                 
         # Run tbss
         self.tbss_all_modalities = ['dti_FA', 'dti_RD', 'dti_MD', 'dti_L1']
