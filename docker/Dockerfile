@@ -204,5 +204,5 @@ RUN pwd
 RUN pwd
 RUN pwd
 RUN pwd
-RUN cd /opt/ENIGMA_CHR_DTI && git checkout initial_deploy && git pull
-CMD cd /opt/ENIGMA_CHR_DTI && git checkout initial_deploy && git pull; xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data
+RUN cd /opt/ENIGMA_CHR_DTI && git pull && git checkout initial_deploy
+CMD cd /opt/ENIGMA_CHR_DTI && git pull && git checkout initial_deploy; xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data
