@@ -132,7 +132,7 @@ RUN apt-get update -qq \
 ENV PATH="/opt/miniconda-latest/bin:$PATH"
 RUN pip install numpy
 RUN pip install scikit-image==0.16.2
-RUN pip install nibabel
+RUN pip install nibabel==4.0.2
 RUN pip install dipy
 RUN git clone https://github.com/kcho/TBSS /opt/tbss
 
@@ -202,4 +202,5 @@ RUN apt-get install -y x11-apps
 #ENV PYTHONUNBUFFERED=1
 #SHELL ["conda", "run", "-n", "enigma-env", "/bin/bash", "-c"]
 RUN conda install -c conda-forge dipy
+RUN pip install nibabel==4.0.2
 CMD cd /opt/ENIGMA_CHR_DTI && git pull; xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data
