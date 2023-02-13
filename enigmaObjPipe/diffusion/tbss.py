@@ -172,7 +172,7 @@ class StudyTBSS(object):
     def run_tbss(self, force: bool = False):
         # self.get_tbss_diff_modalities()
         self.create_tbss_all_csv(self.tbss_all_out_dir)
-        self.execute_tbss()
+        self.execute_tbss(force=force)
 
 
     def tbss_summary(self):
