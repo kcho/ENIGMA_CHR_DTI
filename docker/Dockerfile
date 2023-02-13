@@ -202,5 +202,6 @@ RUN conda install -c conda-forge dipy
 RUN pip install nibabel==4.0.2
 RUN pwd
 RUN pwd
+RUN pwd
 RUN cd /opt/ENIGMA_CHR_DTI && git pull
 CMD cd /opt/ENIGMA_CHR_DTI && git pull; xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data
