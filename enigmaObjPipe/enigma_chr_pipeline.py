@@ -481,11 +481,11 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
                     # {'subject': [subject.subject_name]})
             r = pool.apply_async(run_subject_pipeline_parallel,
                                              (subject, force, test,),
-                                             callback=mycallback).get()
+                                             callback=mycallback)
             results.append(r)
 
-        # for r in results:
-            # r.wait()
+        for r in results:
+            r.get()
 
         pool.close()
         pool.join()
