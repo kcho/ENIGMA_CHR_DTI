@@ -274,6 +274,9 @@ def run_subject_pipeline_parallel(subject: EnigmaChrSubjectDicomDir,
         return False
 
 
+def mycallback(x):
+    return x
+
 
 class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         DicomToolsStudy, DwiToolsStudy):
@@ -477,11 +480,15 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
             # error_df_tmp = pd.DataFrame(
                     # {'subject': [subject.subject_name]})
             r = pool.apply_async(run_subject_pipeline_parallel,
-                                 (subject, force, test,))
+                                             (subject, force, test,),
+                                             callback=mycallback)
             results.append(r)
 
-        for r in results:
-            r.wait()
+        # for r in results:
+            # r.wait()
+
+        pool.close()
+        pool.join()
 
         print(results)
         processing_failed_subject_classes = [1, 2, 3, 4]
