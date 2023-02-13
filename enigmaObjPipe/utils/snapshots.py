@@ -13,6 +13,7 @@ class Snapshot(object):
                 f"(1st B0 volume={self.b0_index[0]})"
 
         if force or not output_file_loc.is_file():
+            print(f'Snapshot: {input_file}')
             nifti_snapshot.SimpleFigure(
                 image_files=[input_file],
                 title=title,
@@ -31,6 +32,7 @@ class Snapshot(object):
         title = f"TBSS {label}"
 
         if force or not output_file_loc.is_file():
+            print(f'Snapshot: {input_file}')
             tbssFigure = nifti_snapshot.TbssFigure(
                 image_files=[input_file],
                 output_file=output_file_loc,
@@ -52,22 +54,23 @@ class Snapshot(object):
         output_file_loc = self.tbss_screen_shot_dir / f"{label}.jpg"
         title = f"TBSS {label}"
 
-        # if force or not output_file_loc.is_file():
-        tbssFigure = nifti_snapshot.TbssFigure(
-            image_files=[input_file],
-            template_FA=background_file,
-            output_file=output_file_loc,
-            cmap_list=[cmap],
-            cbar_titles=[cbar_title],
-            alpha_list=[0.8],
-            title=title,
-            cbar_x=0.35,
-            tbss_filled=True,
-            intensity_percentile=intensity_percentile,
-            cbar_width=0.3,
-            dpi=300)
+        if force or not output_file_loc.is_file():
+            print(f'Snapshot: {input_file}')
+            tbssFigure = nifti_snapshot.TbssFigure(
+                image_files=[input_file],
+                template_FA=background_file,
+                output_file=output_file_loc,
+                cmap_list=[cmap],
+                cbar_titles=[cbar_title],
+                alpha_list=[0.8],
+                title=title,
+                cbar_x=0.35,
+                tbss_filled=True,
+                intensity_percentile=intensity_percentile,
+                cbar_width=0.3,
+                dpi=300)
 
-        tbssFigure.create_figure_non_p_map()
+            tbssFigure.create_figure_non_p_map()
 
 
     def snapshot_diff_first_b0(self, input_file_1, input_file_2,
@@ -83,6 +86,7 @@ class Snapshot(object):
                 f"(1st B0 volume={self.b0_index[0]})"
 
         if force or not output_file_loc.is_file():
+            print(f'Snapshot: {input_file_1} and {input_file_2}')
             nifti_snapshot.SimpleFigure(
                 image_files=[input_file_1, input_file_2],
                 title=title,

@@ -12,28 +12,6 @@ class EddyPipe(object):
     def eddy(self, nproc: int = 1, force: bool = False, test: bool = False):
         '''FSL Eddy'''
         # index
-
-        if force or not self.diff_mask.is_file():
-            # previous masking using dipy
-            # print('Estimating mask')
-            # data = data_img.get_fdata()
-
-            # data = data[:, :, :, self.b0_index].mean(axis=3)
-            # _, mask = median_otsu(data, median_radius=2, numpass=1)
-            # nb.Nifti1Image(mask.astype(int),
-                           # affine=data_img.affine).to_filename(
-                                   # self.diff_mask)
-
-            # new masking using CNN masking
-            # self.CNN_brain_extraction(self.diff_raw_dwi, self.diff_mask)
-            shutil.copy(self.diff_raw_bval,
-                        str(self.diff_dwi_unring).split('.')[0] + '.bval')
-            shutil.copy(self.diff_raw_bvec,
-                        str(self.diff_dwi_unring).split('.')[0] + '.bvec')
-            self.CNN_brain_extraction(self.diff_dwi_unring,
-                                      self.diff_mask,
-                                      nproc=nproc)
-
         data_img = nb.load(self.diff_dwi_unring)
         index_array = np.tile(1, data_img.shape[-1])
         index_loc = self.eddy_out_dir / 'index.txt'
@@ -68,6 +46,7 @@ class EddyPipe(object):
             eddy_command = eddy_command + ' --data_is_shelled'
 
         if not self.diff_ep.with_suffix('.nii.gz').is_file() or force:
+            print('Running Eddy - may take 1~2 hours')
             if test:
                 self.create_fake_eddy_output(eddy_command)
             else:

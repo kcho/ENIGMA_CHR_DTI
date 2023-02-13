@@ -155,6 +155,7 @@ class DwiPipe(object):
             --bvals={self.diff_raw_bval}'
 
         if force or not self.dti_FA.is_file():
+            print('Tensor fit')
             self.run(command)
 
         command = f'fslmaths \

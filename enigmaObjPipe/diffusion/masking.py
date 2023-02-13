@@ -3,6 +3,7 @@ import shutil
 class MaskingPipe(object):
     def cnn_brain_masking(self, force: bool = False, nproc: int = 1):
         if force or not self.diff_mask.is_file():
+            print('Running Masking - may take 10~20 minutes')
             # new masking using CNN masking
             # self.CNN_brain_extraction(self.diff_raw_dwi, self.diff_mask)
             shutil.copy(self.diff_raw_bval,
