@@ -504,6 +504,9 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
             print(f'{len(processing_failed_subject_classes)} case(s) failed '
                   'processing. Please check the log file.')
             raise ProcessingFailure
+
+        for subject in self.subject_classes:
+            subject.subject_pipeline(nproc=1, force=False, test=False)
                 
         # Run tbss
         self.tbss_all_modalities = ['dti_FA', 'dti_RD', 'dti_MD', 'dti_L1']
