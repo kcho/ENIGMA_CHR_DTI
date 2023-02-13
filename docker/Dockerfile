@@ -196,8 +196,9 @@ ENV enigma_data_dir="/opt/tbss/data/enigmaDTI"
 RUN dipy_gibbs_ringing -h
 WORKDIR /data
 RUN apt-get install -y x11-apps
-RUN conda install -c conda-forge dipy
+#RUN conda install -c conda-forge dipy
 
 # nibabel downgrade to a previous version to make it work with PNL-TBSS
 RUN pip install nibabel==4.0.2
+RUN cd /opt/ENIGMA_CHR_DTI && git pull
 CMD cd /opt/ENIGMA_CHR_DTI && git pull; xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data

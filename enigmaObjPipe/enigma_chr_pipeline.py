@@ -474,22 +474,23 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
             raise PartialDataCases
 
         # Actual processing
-        pool = Pool(nproc)
+        # pool = Pool(nproc)
         results = []
         processing_failed_subject_classes = []
         for subject in self.subject_classes:
+            subject.subject_pipeline(force=force, test=test)
             # error_df_tmp = pd.DataFrame(
                     # {'subject': [subject.subject_name]})
-            r = pool.apply_async(run_subject_pipeline_parallel,
-                                             (subject, force, test,),
-                                             callback=mycallback)
-            results.append(r)
+            # r = pool.apply_async(run_subject_pipeline_parallel,
+                                             # (subject, force, test,),
+                                             # callback=mycallback)
+            # results.append(r)
 
-        for r in results:
-            r.get()
+        # for r in results:
+            # r.get()
 
-        pool.close()
-        pool.join()
+        # pool.close()
+        # pool.join()
 
         self.subject_classes = [x.get() for x in results]
         processing_failed_subject_classes = [x for x in self.subject_classes
@@ -509,7 +510,7 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         self.create_tbss_all_csv(self.tbss_all_out_dir)
         if len([x for x in self.subject_classes
                 if x.preproc_completed]) > 1:
-            self.execute_tbss(force)
+            self.execute_tbss(force, nproc=nproc)
         else:
             print('***')
             print('Not enough preprocessed subjects to run TBSS')
