@@ -114,6 +114,11 @@ class EnigmaChrSubjectDicomDir(
         self.snapshot_diff_first_b0(self.diff_dwi_unring, self.diff_raw_dwi,
                                     'Unring DWI', 'Raw DWI', force)
 
+    def subject_pipeline_part2(self,
+                               nproc: int = 1,
+                               force: bool = False,
+                               check_run: bool = False,
+                               test: bool = False):
 
         # 4b. topup if site have reverse encoding maps
         # self.topup_preparation_ampscz(force)
@@ -221,54 +226,11 @@ class EnigmaChrSubjectNiftiDir(EnigmaChrSubjectDicomDir):
                                     'Unring DWI', 'Raw DWI', force)
 
 
-        # 4b. topup if site have reverse encoding maps
-        # self.topup_preparation_ampscz(force)
-
-        # 4c. run Eddy
-        print('Running Eddy - may take 1~2 hours')
-        self.eddy(nproc=nproc, force=force, test=test)
-        self.snapshot_first_b0(self.diff_mask, 'mask', force)
-        self.snapshot_first_b0(self.diff_ep.with_suffix('.nii.gz'),
-                               'Eddy DWI', force)
-        self.snapshot_diff_first_b0(self.diff_ep.with_suffix('.nii.gz'),
-                                    self.diff_dwi_unring,
-                                    'Eddy output', 'Unring DWI', force)
-
-        # 5. Eddy QC
-        self.eddy_squeeze(force)
-        self.eddyRun.df_motion.index = [self.subject_name]
-
-        # 6. Tensor fit & decomp
-        print('Tensor fit')
-        self.fsl_tensor_fit(force)
-
-        # 7. Capture maps
-        print('Snapshots')
-        self.snapshot_first_b0(self.dti_FA, 'FA', force)
-        self.snapshot_first_b0(self.dti_MD, 'MD', force)
-        self.snapshot_first_b0(self.dti_RD, 'RD', force)
-        self.snapshot_first_b0(self.dti_L1, 'AD', force)
-
-        self.tree_out = {}
-        for title, dir_path in {'Raw Nifti': self.nifti_dir,
-                                'Diffusion preproc': self.diff_dir,
-                                'Eddy-squeeze': self.eddy_qc_dir,
-                                'Nifti snapshots': self.screen_shot_dir,
-                                'Web summary': self.web_summary_dir}.items():
-            tree_out_text = os.popen(f'tree {dir_path}').read()
-            self.tree_out[title] = tree_out_text
-
-        # # 8. HTML summary
-        create_subject_summary(self, self.web_summary_file)
-
-        self.preproc_completed = True
-
-
 def run_subject_pipeline_parallel(subject: EnigmaChrSubjectDicomDir,
                                   force: bool = False,
                                   test: bool = False):
     try:
-        subject.subject_pipeline(nproc=1, force=force, test=test)
+        subject.subject_pipeline_part2(nproc=1, force=force, test=test)
     except:
         pass
 
@@ -474,25 +436,26 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
             raise PartialDataCases
 
         # Actual processing
-        # pool = Pool(nproc)
-        results = []
         processing_failed_subject_classes = []
         for subject in self.subject_classes:
             subject.subject_pipeline(force=force, test=test)
-            # error_df_tmp = pd.DataFrame(
-                    # {'subject': [subject.subject_name]})
-            # r = pool.apply_async(run_subject_pipeline_parallel,
-                                             # (subject, force, test,),
-                                             # callback=mycallback)
-            # results.append(r)
 
-        # for r in results:
-            # r.get()
+        pool = Pool(nproc)
+        results = []
+        processing_failed_subject_classes = []
+        for subject in self.subject_classes:
+            r = pool.apply_async(run_subject_pipeline_parallel,
+                                             (subject, force, test,),
+                                             callback=mycallback)
+            results.append(r)
 
-        # pool.close()
-        # pool.join()
+        for r in results:
+            r.get()
 
-        # self.subject_classes = [x.get() for x in results]
+        pool.close()
+        pool.join()
+
+        self.subject_classes = [x.get() for x in results]
         processing_failed_subject_classes = [x for x in self.subject_classes
                                              if not x.preproc_completed]
 
@@ -501,9 +464,6 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
                   'processing. Please check the log file.')
             raise ProcessingFailure
 
-        # for subject in self.subject_classes:
-            # subject.subject_pipeline(nproc=1, force=False, test=False)
-                
         # Run tbss
         self.tbss_all_modalities = ['dti_FA', 'dti_RD', 'dti_MD', 'dti_L1']
         self.tbss_all_modalities_str = ['FA', 'RD', 'MD', 'AD']
