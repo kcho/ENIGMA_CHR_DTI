@@ -17,6 +17,7 @@ def parse_args(argv):
 
     argparser.add_argument("--nproc", "-n",
                            default=4,
+                           type=int,
                            help='Number of threads to use in parallel '
                                 'processing')
 

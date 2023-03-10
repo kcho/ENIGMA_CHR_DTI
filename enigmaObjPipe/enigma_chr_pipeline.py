@@ -468,7 +468,7 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
             print('***')
             print('Not enough preprocessed subjects to run TBSS')
             print('***')
-        
+
         # Study progress
         self.build_study_progress()
         self.dicom_header_summary()
