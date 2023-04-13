@@ -30,6 +30,12 @@ def parse_args(argv):
 
     argparser.add_argument("--log", "-l", help='Save log')
 
+    argparser.add_argument("--nproc", "-n",
+                           default=4,
+                           type=int,
+                           help='Number of threads to use in parallel '
+                                'processing')
+
     argparser.add_argument("--test", "-test", action='store_true',
                            help='Test run')
 
@@ -91,7 +97,8 @@ if __name__ == '__main__':
 
         if len([x for x in enigmaChrStudy.subject_classes
                 if x.preproc_completed]) >= 1:
-            enigmaChrStudy.execute_tbss(force=args.force)
+            enigmaChrStudy.execute_tbss(force=args.force,
+                                        nproc=args.nproc)
         else:
             print('***')
             print('Not enough preprocessed subjects to run TBSS')
