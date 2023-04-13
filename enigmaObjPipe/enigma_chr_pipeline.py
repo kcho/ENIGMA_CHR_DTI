@@ -284,7 +284,7 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
             if len(self.subjects) < 1:
                 print('-'*80)
                 print('No dicom directories are detected')
-                if not self.sourcedata_root_check():
+                if not self.sourcedata_root_check:
                     print("Your data structure does not have 'sourcedata' "
                           "directory")
                     print("Please see the documentation for how to structure "
