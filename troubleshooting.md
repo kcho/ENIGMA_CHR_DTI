@@ -1,5 +1,11 @@
 # Troubleshooting
 
+## Contents
+- [DWI data in both encoding acquisition for EPI distortion correction](https://github.com/kcho/ENIGMA_CHR_DTI/edit/main/troubleshooting.md#dwi-data-in-both-encoding-acquisition-for-epi-distortion-correction)
+- [`ProcessingFailure` before the TBSS step](https://github.com/kcho/ENIGMA_CHR_DTI/edit/main/troubleshooting.md#philips-data-with-parrec-dicom-files)
+- [Resource error in the TBSS step](https://github.com/kcho/ENIGMA_CHR_DTI/edit/main/troubleshooting.md#resource-error-in-the-tbss-step)
+
+
 ## DWI data in both encoding acquisition for EPI distortion correction
 
 The ENIGMA-CHR diffusion data should be preprocessed without EPI-distortion correction. Given that most ENIGMA-CHR sites have a single dMRI in a single encoding direction, we made the decision to use dMRI without EPI correction, using the reverse-encoding information to ensure consistency across different ENIGMA-CHR sites.
@@ -13,7 +19,11 @@ Unfortunatley, the pipeline was not tested to work with the PAR/REC format, and 
 
 
 
-## `X case(s) failed processing. Please check the log file`
+## `ProcessingFailure` before the TBSS step
+
+```sh
+X case(s) failed processing. Please check the log file
+```
 
 If you see this error message, it means the pipeline raised `ProcessingFailure` error. This error is raised right before executing `PNL TBSS` step, when there is any incompleted preprocessing. One or more of the following could have raised the issue.
 
