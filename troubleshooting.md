@@ -1,5 +1,11 @@
 # Troubleshooting
 
+## DWI data in both encoding acquisition for EPI distortion correction
+
+The ENIGMA-CHR diffusion data should be preprocessed without EPI-distortion correction. Given that most ENIGMA-CHR sites have a single dMRI in a single encoding direction, we made the decision to use dMRI without EPI correction, using the reverse-encoding information to ensure consistency across different ENIGMA-CHR sites.
+ 
+This [link](https://github.com/kcho/ENIGMA_CHR_DTI/blob/kcho/reverse_encoding_DWI/docs/reverse_encoding_dwi.md) includes instructions on how to run your pipeline on one of the dMRI series.
+
 
 ## `X case(s) failed processing. Please check the log file`
 
