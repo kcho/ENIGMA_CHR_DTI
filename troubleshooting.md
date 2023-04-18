@@ -21,3 +21,15 @@ Please find the problematic cases by following below and correct the input data.
 
 
 Once you've identified the subject with issue, please provide the correct dicom files to its correponding directory under `/PATH/TO/YOUR/DATA/sourcedata` and rerun the [ENIGMA-CHR container](https://github.com/kcho/ENIGMA_CHR_DTI#running-the-enigma-chr-dti-pipeline)
+
+
+## Resource error in the TBSS step
+
+```sh
+terminate called after throwing an instance of 'std::system_error'
+  what():  Resource temporarily unavailable
+```
+
+If you see this error message, the ENIGMA-CHR pipeline may have assinged to use too many processors on your server. In this cases, the job could be terminated by your system administrator.
+
+A new version of ENIGMA-CHR Diffusion pipeline code is added to resolve this issue. Please see [here](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/docs/nproc_error.md).
