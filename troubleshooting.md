@@ -52,6 +52,6 @@ terminate called after throwing an instance of 'std::system_error'
   what():  Resource temporarily unavailable
 ```
 
-If you see this error message, the ENIGMA-CHR pipeline may have assinged to use too many processors on your server. In this cases, the job could be terminated by your system administrator.
+If you see this error message, the ENIGMA-CHR pipeline may have assinged to use too many processors on your server. In these cases, the job could be terminated by your system administrator raising the error above.
 
 A new version of ENIGMA-CHR Diffusion pipeline code is added to resolve this issue. Please see [here](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/docs/nproc_error.md).
