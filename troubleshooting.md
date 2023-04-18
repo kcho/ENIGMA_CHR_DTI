@@ -7,6 +7,12 @@ The ENIGMA-CHR diffusion data should be preprocessed without EPI-distortion corr
 This [link](https://github.com/kcho/ENIGMA_CHR_DTI/blob/kcho/reverse_encoding_DWI/docs/reverse_encoding_dwi.md) includes instructions on how to run your pipeline on one of the dMRI series.
 
 
+## Philips data with PAR/REC dicom files
+
+Unfortunatley, the pipeline was not tested to work with the PAR/REC format, and there could be unexpected errors when you provide PAR/REC data to the ENIGMA-CHR pipeline. However, we designed the pipeline to take nifti files and it would be easier for your site to provide a nifti, bval, and bvec files for each subject following this [link](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/nifti_input.md) to run the pipeline.
+
+
+
 ## `X case(s) failed processing. Please check the log file`
 
 If you see this error message, it means the pipeline raised `ProcessingFailure` error. This error is raised right before executing `PNL TBSS` step, when there is any incompleted preprocessing. One or more of the following could have raised the issue.
