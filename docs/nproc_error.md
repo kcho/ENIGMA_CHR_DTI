@@ -18,6 +18,7 @@ git clone https://github.com/kcho/ENIGMA_CHR_DTI
 ```sh
 path_to_image=/PATH/TO/YOUR/SINGULARITY/IMAGE
 singularity exec \
+    -B /path/to/your/data:/data:rw \
     -B /data/predict1/home/kcho/enigma/ENIGMA_CHR_DTI:/opt/ENIGMA_CHR_DTI \
     ${path_to_image} \
       /bin/bash -c "conda activate /opt/fsl-6.0.6; xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_study.py -b /data -n 4"
