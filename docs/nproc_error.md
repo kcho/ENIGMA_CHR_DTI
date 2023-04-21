@@ -3,6 +3,8 @@
 
 ### How to limit number of processes used in the TBSS step
 
+#### For Singularity
+
 2023-04-21
 
 Singularity will set the image as readable-only, therefore does not allow downloading more recent version of `ENIGMA_CHR_DTI` repository. For a work around, you can download the most recent version of `ENIGMA_CHR_DTI` outside the Singularity image and mount it over the `/opt/ENIGMA_CHR_DTI` path.
@@ -25,8 +27,9 @@ singularity exec \
 ```
 
 
-2023-04-13
+#### For Docker
 
+2023-04-13
 
 1. Enter the container in the interactive mode
 
