@@ -5,6 +5,7 @@
 - [`ProcessingFailure` before the TBSS step](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/troubleshooting.md#philips-data-with-parrec-dicom-files)
 - [Resource error in the TBSS step](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/troubleshooting.md#resource-error-in-the-tbss-step)
 - [Docker run hangs infinitely](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/troubleshooting.md#docker-hangs-infinitely)
+- [`collect_outputs.py` does not work](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/troubleshooting.md#collect_outputspy-does-not-work)
 
 
 ## DWI data in both encoding acquisition for EPI distortion correction
@@ -62,10 +63,42 @@ A new version of ENIGMA-CHR Diffusion pipeline code is added to resolve this iss
 
 4th Thursday 2023
 
-`xvfb-run` may hide error messages from the pipeline on some systems, and can make the pipeline to be stuck.
+### `xvfb-run` may hide error messages from the pipeline on some systems, and can make the pipeline to be stuck.
+
+### Suggested solutions
 
 - One solution is to try running the same command without `xvfb-run` and read through the output messages in the terminal.
 - Another solution is to go into the image shell, and running the pipeline within the image as documented in the #5 of [Basic debugging](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/troubleshooting.md#basic-debugging)
+
+
+## `collect_outputs.py` does not work
+
+4th May, 2023
+
+### When `collect_outputs.py` was ran with the following command, the pipeline runs the main pipeline.
+
+```sh
+path_to_image=/path/to/enigma/chr/singularity.simg
+enigma_chr_dir=/path/to/chr/data
+
+singularity run -e -B ${enigma_chr_dir}:/data:rw ${path_to_image} collect_outputs.py
+```
+
+### Suggested solutions
+
+1. Check if `output_collection.zip` is created under your `${enigma_chr_dir}`
+
+2. Check if you can run the `collect_outputs.py` function within the image.
+
+```sh
+path_to_image=/path/to/enigma/chr/singularity.simg  # change this path to the singularity image path in your system
+enigma_chr_dir=/path/to/chr/data  # change this path to your data root in your system
+
+singularity run -e -B ${enigma_chr_dir}:/data:rw ${path_to_image} /bin/bash
+conda activate /opt/fsl-6.0.6
+python /opt/ENIGMA_CHR_DTI/scripts/collect_outputs.py
+```
+
 
 
 ## Basic debugging
@@ -113,3 +146,5 @@ conda activate /opt/fsl-6.0.6
 which python
 xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data
 ```
+
+
