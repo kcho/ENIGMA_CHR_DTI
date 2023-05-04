@@ -60,6 +60,16 @@ A new version of ENIGMA-CHR Diffusion pipeline code is added to resolve this iss
 
 ## Docker hangs infinitely
 
+4th Thursday 2023
+
+`xvfb-run` may hide error messages from the pipeline on some systems, and can make the pipeline to be stuck.
+
+- One solution is to try running the same command without `xvfb-run` and read through the output messages in the terminal.
+- Another solution is to go into the image shell, and running the pipeline within the image as documented in the #5 of [Basic debugging](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/troubleshooting.md#basic-debugging)
+
+
+## Basic debugging
+
 1. Check the list of docker images
 
 ```sh
@@ -101,5 +111,5 @@ docker run -it -v ${enigma_chr_dir}:/data kcho/enigma-chr-pipeline which python
 ```sh
 conda activate /opt/fsl-6.0.6
 which python
-xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data --nifti_input
+xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data
 ```
