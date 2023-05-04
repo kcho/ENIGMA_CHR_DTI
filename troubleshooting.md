@@ -4,6 +4,7 @@
 - [DWI data in both encoding acquisition for EPI distortion correction](https://github.com/kcho/ENIGMA_CHR_DTI/edit/main/troubleshooting.md#dwi-data-in-both-encoding-acquisition-for-epi-distortion-correction)
 - [`ProcessingFailure` before the TBSS step](https://github.com/kcho/ENIGMA_CHR_DTI/edit/main/troubleshooting.md#philips-data-with-parrec-dicom-files)
 - [Resource error in the TBSS step](https://github.com/kcho/ENIGMA_CHR_DTI/edit/main/troubleshooting.md#resource-error-in-the-tbss-step)
+- [Docker run hangs infinitely](https://github.com/kcho/ENIGMA_CHR_DTI/edit/main/troubleshooting.md#docker-hangs-infinitely)
 
 
 ## DWI data in both encoding acquisition for EPI distortion correction
@@ -55,3 +56,50 @@ terminate called after throwing an instance of 'std::system_error'
 If you see this error message, the ENIGMA-CHR pipeline may have assinged to use too many processors on your server. In these cases, the job could be terminated by your system administrator raising the error above.
 
 A new version of ENIGMA-CHR Diffusion pipeline code is added to resolve this issue. Please see [here](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/docs/nproc_error.md).
+
+
+## Docker hangs infinitely
+
+1. Check the list of docker images
+
+```sh
+$ docker images
+```
+
+2. See if the container image has following directories.
+
+```sh
+$ enigma_chr_dir=/your/data/path
+$ docker run -it -v ${enigma_chr_dir}:/data kcho/enigma-chr-pipeline /bin/bash
+
+# now inside the container
+$ ls /opt
+```
+
+
+3. See if your data has been arranged in the required format
+
+```sh
+$ enigma_chr_dir=/your/data/path
+$ docker run -it -v ${enigma_chr_dir}:/data kcho/enigma-chr-pipeline /bin/bash
+
+# now inside the container
+ls /data/
+ls /data/sourcedata
+ls /data/rawdata/
+```
+
+
+4. Test the python linked with the pipeline
+
+```sh
+docker run -it -v ${enigma_chr_dir}:/data kcho/enigma-chr-pipeline which python
+```
+
+5. Test running the pipeline inside the image
+
+```sh
+conda activate /opt/fsl-6.0.6
+which python
+xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data --nifti_input
+```
