@@ -1,10 +1,10 @@
 # Troubleshooting
 
 ## Contents
-- [DWI data in both encoding acquisition for EPI distortion correction](https://github.com/kcho/ENIGMA_CHR_DTI/edit/main/troubleshooting.md#dwi-data-in-both-encoding-acquisition-for-epi-distortion-correction)
-- [`ProcessingFailure` before the TBSS step](https://github.com/kcho/ENIGMA_CHR_DTI/edit/main/troubleshooting.md#philips-data-with-parrec-dicom-files)
-- [Resource error in the TBSS step](https://github.com/kcho/ENIGMA_CHR_DTI/edit/main/troubleshooting.md#resource-error-in-the-tbss-step)
-- [Docker run hangs infinitely](https://github.com/kcho/ENIGMA_CHR_DTI/edit/main/troubleshooting.md#docker-hangs-infinitely)
+- [DWI data in both encoding acquisition for EPI distortion correction](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/troubleshooting.md#dwi-data-in-both-encoding-acquisition-for-epi-distortion-correction)
+- [`ProcessingFailure` before the TBSS step](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/troubleshooting.md#philips-data-with-parrec-dicom-files)
+- [Resource error in the TBSS step](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/troubleshooting.md#resource-error-in-the-tbss-step)
+- [Docker run hangs infinitely](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/troubleshooting.md#docker-hangs-infinitely)
 
 
 ## DWI data in both encoding acquisition for EPI distortion correction
