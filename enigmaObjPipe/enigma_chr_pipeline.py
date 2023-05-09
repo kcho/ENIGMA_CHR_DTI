@@ -166,6 +166,10 @@ class EnigmaChrSubjectDicomDir(
 
         self.preproc_completed = True
 
+    def check_complete(self):
+        if self.dti_FA.is_file():
+            return True
+
 
 class EnigmaChrSubjectNiftiDir(EnigmaChrSubjectDicomDir):
     def __init__(self, nifti_dir: Path):
@@ -450,7 +454,7 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
 
         self.subject_classes = [x.get() for x in results]
         processing_failed_subject_classes = [x for x in self.subject_classes
-                                             if not x.preproc_completed]
+                                             if not x.check_complete()]
 
         if len(processing_failed_subject_classes) > 0:
             print(f'{len(processing_failed_subject_classes)} case(s) failed '
