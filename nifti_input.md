@@ -35,3 +35,13 @@ $ docker run -it \
 $ singularity shell -e -B ${enigma_chr_dir}:/data \
     enigma_chr_pipeline.simg xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data --nifti_input
 ```
+
+
+## Known issues
+
+### `ProcessingFailure`
+
+10th May, 2023
+
+The latest version of the pipeline container raises a false alarm of `ProcessingFailure` after preprocessing all available data. This bug is fixed in the core pipeline and will be represented in the next version of the pipeline container. Simple fix to this false alarm would be re-running the pipeline using the same command. The pipeline will not re-run already completed preprocessing steps and this will also bypass the false alarm (assuming there is no real `ProcessingFailure`)
+
