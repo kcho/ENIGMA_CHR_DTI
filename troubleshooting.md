@@ -70,10 +70,13 @@ A new version of ENIGMA-CHR Diffusion pipeline code is added to resolve this iss
 
 ### `xvfb-run` may hide error messages from the pipeline on some systems, and can make the pipeline to be stuck.
 
+We found, on some systems, the `xvfb-run` hides the messages printed by the pipeline on the terminal screen.
+
 ### Suggested solutions
 
-- One solution is to try running the same command without `xvfb-run` and read through the output messages in the terminal.
+- Try running the same command without `xvfb-run` and see if the pipeline prints out messages on the terminal screen. Since `xvfb-run` is only required at the final report creation step, it's safe to run the command without `xvfb-run`. Without `xvfb-run`, the pipeline is expected to raise the `X11` related error after TBSS is completed. Then, you can simply re-run the same command with `xvfb-run` to create the final report. (Re-running the command will not re-execute all preprocessing steps, but skip already finished steps.) The PDF report is not vital for the QC process, so you can also skip re-running the command with `xvfb-run`.
 - Another solution is to go into the image shell, and running the pipeline within the image as documented in the #5 of [Basic debugging](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/troubleshooting.md#basic-debugging)
+- `xvfb-run` layer will be removed in the new version of the pipeline.
 
 
 ## `collect_outputs.py` does not work
