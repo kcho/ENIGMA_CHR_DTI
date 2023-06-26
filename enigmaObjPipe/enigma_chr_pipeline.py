@@ -459,6 +459,21 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         if len(processing_failed_subject_classes) > 0:
             print(f'{len(processing_failed_subject_classes)} case(s) failed '
                   'processing. Please check the log file.')
+            error_df = pd.DataFrame({
+                'list_of_preprocessing_failed_subjects': [
+                    x.subject_name for x in processing_failed_subject_classes],
+                })
+            error_files = self.root_dir.glob('processing_failure_v*.csv')
+            max_num = 0
+            for error_file in error_files:
+                num = int(re.search(r'processing_failure_v(\d*).csv',
+                                    error_file.name).group(1))
+                if num > max_num:
+                    max_num = num
+
+            error_file_to_write = self.root_dir / \
+                f'processing_failure_v{max_num + 1}.csv'
+            error_df.to_csv(error_file_to_write)
             raise ProcessingFailure
 
         # Run tbss
