@@ -48,7 +48,8 @@ Please find the problematic cases by following below and correct the input data.
 4. (Without going into the docker), browse through the subject directories under `/PATH/TO/YOUR/DATA/derivatives/web_summary` and take a look at the `pdf` files created for each subject. Take a look at the figures included in the `pdf` file and see if you can detect anything wrong with the data.
 
 
-Once you've identified the subject with issue, please provide the correct dicom files to its correponding directory under `/PATH/TO/YOUR/DATA/sourcedata` and rerun the [ENIGMA-CHR container](https://github.com/kcho/ENIGMA_CHR_DTI#running-the-enigma-chr-dti-pipeline)
+Once you identify subjects with issues, please provide the correct dicom files or remove non-DWI dicoms from their correponding directory under `sourcedata/{SUBJECT}`, then rerun the [ENIGMA-CHR container](https://github.com/kcho/ENIGMA_CHR_DTI#running-the-enigma-chr-dti-pipeline).
+
 
 
 ## Resource error in the TBSS step
