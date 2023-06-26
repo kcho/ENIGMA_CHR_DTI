@@ -6,7 +6,6 @@
 - [Resource error in the TBSS step](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/troubleshooting.md#resource-error-in-the-tbss-step)
 - [Docker run hangs infinitely](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/troubleshooting.md#docker-hangs-infinitely)
 - [`collect_outputs.py` does not work](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/troubleshooting.md#collect_outputspy-does-not-work)
-- The pipeline returns "`ProcessingFailure`"
 
 
 ## DWI data in both encoding acquisition for EPI distortion correction
@@ -31,12 +30,12 @@ Unfortunatley, the pipeline was not tested to work with the PAR/REC format, and 
 X case(s) failed processing. Please check the log file
 ```
 
-If you see this error message, it means the pipeline raised the `ProcessingFailure` error. This error is raised right before executing `PNL TBSS` step, when there is any incompleted preprocessing. One or more of the following could have raised the issue.
+The pipeline checks for the preprocessing-completeness right before executing `PNL TBSS` step. If you see above error message, one or more data may have failed processing steps. See the list below for potential cause of the error.
 
-1. Input DWI data is completely missing for some subjects.
-2. Input DWI data is partial, meaning there were some missing dicom files for some subjects.
-3. Input DWI data includes non-DWI dicoms. This may led to failures in one of the preprocessing steps.
-4. One of the preprocessing step failed becuase of the bad quality data (Rare).
+1. The pipeline creates the subject list based on the directories under `rawdata` and `sourcedata`. If there are any empty folders under `rawdata` or `sourcedata`, the pipeline will raise `ProcessingFailure`. Please check if you have any empty folders under your `rawdata` and `sourcedata` directories. 
+2. If there were some missing dicom files for some subjects, the nifti file that gets created from the partial data will be in the wrong format for the pipeline to process. Please check if you are providing the complete dicom data under the `sourcedata` folder.
+3. This there are any non-DWI dicoms included in the subject data, these extra files will also get converted, which may interfere with the preprocessing steps in the pipeline. Please include only DWI dicom files under the `sourcedata` folder.
+4. Although it is rare, one of the preprocessing step may have failed because of a poor data quality. Please identify the subject without `derivatives/dwi_preproc/{SUBJECT}/dti_FA.nii.gz` - these subjects will be the subjects who failed to complete preprocessing steps. Please see if there is anything wrong in the input data by visualizing the nifti files, bval, and bvec files under `rawdata/{SUBJECT}`.
 
 
 ### To resolve the issue, identify and correct the data.
