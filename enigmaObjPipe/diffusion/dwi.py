@@ -166,7 +166,7 @@ class DwiPipe(object):
         if force or not self.dti_RD.is_file():
             self.run(command)
 
-    def check_diff_nifti_info(self, force: bool = False):
+    def check_diff_nifti_info(self):
         if not self.diff_raw_dwi.is_file():
             print(f'{self.subject_name}: Diffusion DWI is missing '
                   f'({self.diff_raw_dwi})')
