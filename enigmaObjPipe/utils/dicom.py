@@ -102,12 +102,17 @@ class DicomTools(object):
         if test:
             return
 
-        if len(list(self.nifti_dir.glob('*'))) > 4:
-            print(list(self.nifti_dir.glob('*')))
-            raise ExtraDicomException
+        # not checking .json file for now
+        for extension in ['nii', 'bval', 'bvec']:
+            if len(list(self.nifti_dir.glob(f'*.{extension}*'))) > 1:
+                print(list(self.nifti_dir.glob(f'*.{extension}*')))
+                print(f'There are more than one {extension} files '
+                      f'for {self.subject}')
+                raise ExtraDicomException
 
-        if len(list(self.nifti_dir.glob('*'))) < 4:
-            print(list(self.nifti_dir.glob('*')))
+        if not all([self.diff_raw_dwi.is_file(),
+                    self.diff_raw_bvec.is_file(),
+                    self.diff_raw_bval.is_file()]):
             raise PartialDicomException
 
 
