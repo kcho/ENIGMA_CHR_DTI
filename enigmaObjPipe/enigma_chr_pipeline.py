@@ -1,8 +1,8 @@
-from pathlib import Path
 import sys
 import os
 import re
 import pandas as pd
+from pathlib import Path
 from multiprocessing import Pool
 
 from enigmaObjPipe.utils.paths import read_objPipe_config
@@ -99,7 +99,7 @@ class EnigmaChrSubjectDicomDir(
         self.convert_dicom_into_bids(force=force, test=test)
 
         # 3. check if the conversion worked correctly
-        self.check_diff_nifti_info(force)
+        self.check_diff_nifti_info()
 
         if check_run:
             return
@@ -107,7 +107,6 @@ class EnigmaChrSubjectDicomDir(
     def subject_pipeline_part1(self,
                                nproc: int = 1,
                                force: bool = False,
-                               check_run: bool = False,
                                test: bool = False):
         self.snapshot_first_b0(self.diff_raw_dwi, 'Raw DWI', force)
                       
@@ -119,12 +118,11 @@ class EnigmaChrSubjectDicomDir(
                                     'Unring DWI', 'Raw DWI', force)
 
         # 5. Masking
-        self.cnn_brain_masking(force=force)
+        self.cnn_brain_masking(force=force, nproc=nproc)
 
     def subject_pipeline_part2(self,
                                nproc: int = 1,
                                force: bool = False,
-                               check_run: bool = False,
                                test: bool = False):
 
         # 4b. topup if site have reverse encoding maps

@@ -89,11 +89,12 @@ class DicomTools(object):
         elif not re_run and not all([self.diff_raw_dwi.is_file(),
                                      self.diff_raw_bvec.is_file(),
                                      self.diff_raw_bval.is_file()]):
-            print('Rerun')
+            print('Some nifti input files are missing - re-running dcm2niix')
             self.convert_dicom_into_bids(force=True, test=test)
+
         elif re_run and not all([self.diff_raw_dwi.is_file(),
-                                     self.diff_raw_bvec.is_file(),
-                                     self.diff_raw_bval.is_file()]):
+                                 self.diff_raw_bvec.is_file(),
+                                 self.diff_raw_bval.is_file()]):
             raise PartialDicomException
         else:
             pass
