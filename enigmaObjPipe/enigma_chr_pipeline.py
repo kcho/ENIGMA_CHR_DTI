@@ -90,6 +90,8 @@ class EnigmaChrSubjectDicomDir(
         MaskingPipe, EddyPipe, Snapshot):
 
     def __init__(self, dicom_dir):
+        self.start_from_dicom = False
+
         # under PathReg class
         self.init_from_dicom_dir(self, dicom_dir)
         self.init_diff_files(self)
@@ -107,11 +109,15 @@ class EnigmaChrSubjectDicomDir(
                          check_run: bool = False,
                          test: bool = False):
         """Subject-wise pipeline"""
-        # 1. check basic dicom information from dicom headers
-        self.check_dicom_info(force)
+        if self.start_from_dicom:
+            # 1. check basic dicom information from dicom headers
+            self.check_dicom_info(force)
 
-        # 2. convert dicom files into nifti format, in BIDS
-        self.convert_dicom_into_bids(force=force, test=test)
+            # 2. convert dicom files into nifti format, in BIDS
+            self.convert_dicom_into_bids(force=force, test=test)
+        else:
+            # register 'no dicom input' to self.dicom_header_series attr
+            self.no_dicom_info(force)
 
         # 3. check if the conversion worked correctly
         self.check_diff_nifti_info()
@@ -215,26 +221,14 @@ class EnigmaChrSubjectNiftiDir(EnigmaChrSubjectDicomDir):
             >> enigmaChrSubject = EnigmaChrSubjectNiftiDir(nifti_dir)
             >> enigmaChrSubject.subject_pipeline()
         '''
+        self.start_from_dicom = False
+
         sourcedata_root = Path(nifti_dir).parent.parent / 'sourcedata'
         subject_name = Path(nifti_dir).name
         dicom_dir_missing = sourcedata_root / subject_name
 
         EnigmaChrSubjectDicomDir.__init__(self, dicom_dir_missing)
 
-    def subject_pipeline(self,
-                         nproc: int = 1,
-                         force: bool = False,
-                         check_run: bool = False,
-                         test: bool = False):
-        '''Subject-wise pipeline'''
-        # register 'no dicom input' to self.dicom_header_series attr
-        self.no_dicom_info(force)
-
-        # 3. check if the conversion worked correctly
-        self.check_diff_nifti_info(force)
-
-        if check_run:
-            return
 
 def run_subject_pipeline_parallel(subject: EnigmaChrSubjectDicomDir,
                                   force: bool = False,
