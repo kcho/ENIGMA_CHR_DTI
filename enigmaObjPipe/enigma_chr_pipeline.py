@@ -26,14 +26,13 @@ from enigmaObjPipe.denoising.gibbs import NoiseRemovalPipe
 class PartialDataCases(Exception):
     pass
 
+
 class ProcessingFailure(Exception):
     pass
 
 
-class EnigmaChrSubjectDicomDir(
-        DicomTools, RunCommand, DwiPipe, NoiseRemovalPipe, MaskingPipe,
-        EddyPipe, Snapshot):
-    def __init__(self, dicom_dir):
+class PathReg(object):
+    def init_from_dicom_dir(self, dicom_dir):
         self.dicom_dir = Path(dicom_dir)
         self.subject_name = dicom_dir.name
         self.study_dir = self.dicom_dir.parent.parent
@@ -42,6 +41,12 @@ class EnigmaChrSubjectDicomDir(
         self.deriv_dwi_root = self.derivatives_root / 'dwi_preproc'
         self.diff_dir = self.deriv_dwi_root / self.subject_name
 
+    def init_diff_files(self):
+        """Register diffusion files
+
+        Requires:
+            self.nifti_dir and self.diff_dir attribute
+        """
         self.diff_raw_dwi = self.nifti_dir / f'{self.subject_name}.nii.gz'
         self.diff_raw_bvec = self.nifti_dir / f'{self.subject_name}.bvec'
         self.diff_raw_bval = self.nifti_dir / f'{self.subject_name}.bval'
@@ -57,21 +62,14 @@ class EnigmaChrSubjectDicomDir(
                 f'{self.subject_name}_eddy_out.nii.gz'
         self.diff_ep_bvec = self.diff_dir / \
                 f'{self.subject_name}_eddy_out.eddy_rotated_bvecs'
-
         self.repol_on = True
-
 
         # diffusion scalar maps from dtifit
         for i in ['FA', 'L1', 'L2', 'L3', 'MD',
                   'MO', 'S0', 'V1', 'V2', 'V3', 'RD']:
             setattr(self, f'dti_{i}', self.diff_dir / f'dti_{i}.nii.gz')
 
-        # preproc completed
-        if self.dti_FA.is_file():
-            self.preproc_completed = True
-        else:
-            self.preproc_completed = False
-
+    def init_extra(self):
         # eddy qc output directory
         self.eddy_qc_dir = self.derivatives_root / \
                 'eddy_qc' / self.subject_name
@@ -86,12 +84,29 @@ class EnigmaChrSubjectDicomDir(
         self.web_summary_file = self.web_summary_dir / \
                 f'{self.subject_name}.html'
 
+
+class EnigmaChrSubjectDicomDir(
+        PathReg, DicomTools, RunCommand, DwiPipe, NoiseRemovalPipe,
+        MaskingPipe, EddyPipe, Snapshot):
+
+    def __init__(self, dicom_dir):
+        # under PathReg class
+        self.init_from_dicom_dir(self, dicom_dir)
+        self.init_diff_files(self)
+        self.init_extra(self)
+
+        # preproc completed
+        if self.dti_FA.is_file():
+            self.preproc_completed = True
+        else:
+            self.preproc_completed = False
+
     def subject_pipeline(self,
                          nproc: int = 1,
                          force: bool = False,
                          check_run: bool = False,
                          test: bool = False):
-        '''Subject-wise pipeline'''
+        """Subject-wise pipeline"""
         # 1. check basic dicom information from dicom headers
         self.check_dicom_info(force)
 
