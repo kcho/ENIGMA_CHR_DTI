@@ -1,6 +1,8 @@
-### If you get memory error, follow the steps below
+### If you get a memory error, try following the steps below.
 
 #### Step 1.
+
+Run subject preprocessing steps
 
 ```
 # docker
@@ -12,6 +14,8 @@ singularity exec -B ${data_location}:/data enigma-chr-pipeline.simg xvfb-run -a 
 
 #### Step 2.
  
+Run TBSS step
+
 ```
 # docker
 docker run -it -v ${data_location}:/data enigma-chr-pipeline xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_study.py -b /data
