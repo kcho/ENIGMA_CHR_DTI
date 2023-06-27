@@ -6,7 +6,6 @@
 - [Resource error in the TBSS step](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/troubleshooting.md#resource-error-in-the-tbss-step)
 - [Docker run hangs infinitely](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/troubleshooting.md#docker-hangs-infinitely)
 - [`collect_outputs.py` does not work](https://github.com/kcho/ENIGMA_CHR_DTI/blob/main/troubleshooting.md#collect_outputspy-does-not-work)
-- The pipeline returns "`ProcessingFailure`"
 
 
 ## DWI data in both encoding acquisition for EPI distortion correction
@@ -31,25 +30,45 @@ Unfortunatley, the pipeline was not tested to work with the PAR/REC format, and 
 X case(s) failed processing. Please check the log file
 ```
 
-If you see this error message, it means the pipeline raised the `ProcessingFailure` error. This error is raised right before executing `PNL TBSS` step, when there is any incompleted preprocessing. One or more of the following could have raised the issue.
+The pipeline checks for the preprocessing-completeness right before executing `PNL TBSS` step. If you see above error message, one or more data may have failed processing steps. See the list below for the potential cause of the error.
 
-1. Input DWI data is completely missing for some subjects.
-2. Input DWI data is partial, meaning there were some missing dicom files for some subjects.
-3. Input DWI data includes non-DWI dicoms. This may led to failures in one of the preprocessing steps.
-4. One of the preprocessing step failed becuase of the bad quality data (Rare).
+### The potential causes of the error
+
+1. The pipeline creates the subject list based on the directories under `rawdata` and `sourcedata`. If there are any empty folders under `rawdata` or `sourcedata`, the pipeline will raise `ProcessingFailure`. Please check if you have any empty folders under your `rawdata` and `sourcedata` directories. 
+2. If there were some missing dicom files for some subjects, the nifti file that gets created from the partial data will be in the wrong format for the pipeline to process. Please check if you are providing the complete dicom data under the `sourcedata` folder.
+3. This there are any non-DWI dicoms included in the subject data, these extra files will also get converted, which may interfere with the preprocessing steps in the pipeline. Please include only DWI dicom files under the `sourcedata` folder.
+4. Although it is rare, one of the preprocessing step may have failed because of a poor data quality. Please identify the subject without `derivatives/dwi_preproc/{SUBJECT}/dti_FA.nii.gz` - these subjects will be the subjects who failed to complete preprocessing steps. Please see if there is anything wrong in the input data by visualizing the nifti files, bval, and bvec files under `rawdata/{SUBJECT}`.
+5. The pipeline saves `cases_with_error_vXX.csv` under your root directory to describe preprocessing failures. Please investigate this file to track subjects with processing failures.
 
 
-### To resolve the issue, identify and correct the data.
+### Follow the items below to resolve the error
 
 Please find the problematic cases by following below and correct the input data.
 
-1. Try re-running the pipeline. The pipeline will not re-run already completed preprocessing steps, but run from failed steps.
+1. Try re-running the pipeline using the same command. (The pipeline will not overwrite already completed preprocessing steps, but only run failed steps.)
 2. (Without going into the docker), browse through all subject directories under `/PATH/TO/YOUR/DATA/rawdata` to see if any of the subject does not have DWI nifti file, bval, or bvec file.
-3. (Without going into the docker), browse through all subject directories under `/PATH/TO/YOUR/DATA/derivatives/eddy_qc` to identify any subject without the `eddy_summary.html`. These subject would be the problematic cases. Investigate if there is anything different in the `/PATH/TO/YOUR/DATA/rawdata` and `/PATH/TO/YOUR/DATA/sourcedata` for these subjects.
+3. (Without going into the docker), browse through all subject directories under `/PATH/TO/YOUR/DATA/derivatives/eddy_qc` to identify any subject without the `eddy_summary.html`. These subjects would be the problematic cases. Investigate if there is anything different in the `/PATH/TO/YOUR/DATA/rawdata` and `/PATH/TO/YOUR/DATA/sourcedata` for these subjects.
 4. (Without going into the docker), browse through the subject directories under `/PATH/TO/YOUR/DATA/derivatives/web_summary` and take a look at the `pdf` files created for each subject. Take a look at the figures included in the `pdf` file and see if you can detect anything wrong with the data.
 
+Once you identify subjects with issues, please provide the correct dicom files or remove non-DWI dicoms from their corresponding directory under `sourcedata/{SUBJECT}`, then rerun the [ENIGMA-CHR container](https://github.com/kcho/ENIGMA_CHR_DTI#running-the-enigma-chr-dti-pipeline).
 
-Once you've identified the subject with issue, please provide the correct dicom files to its correponding directory under `/PATH/TO/YOUR/DATA/sourcedata` and rerun the [ENIGMA-CHR container](https://github.com/kcho/ENIGMA_CHR_DTI#running-the-enigma-chr-dti-pipeline)
+
+### Advanced debugging to resolve `ProcessingFailure`
+
+For advanced users, please follow the steps below to run `temporary-trouble-shooting` branch of the pipeline to find out which subject is raising the `ProcessingFailure` error.
+
+```sh
+# enter the container in the shell mode 
+$ enigma_chr_dir=/your/data/path
+$ docker run -it -v ${enigma_chr_dir}:/data kcho/enigma-chr-pipeline /bin/bash
+
+# once inside the container
+$ conda activate /opt/fsl-6.0.6
+$ cd /opt/ENIGMA_CHR_DTI
+$ git checkout temporary-trouble-shooting
+$ git pull
+$ xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data
+```
 
 
 ## Resource error in the TBSS step
