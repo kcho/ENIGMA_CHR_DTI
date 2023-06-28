@@ -26,6 +26,28 @@ singularity exec -B ${data_location}:/data enigma-chr-pipeline.simg xvfb-run -a 
 ```
 
 
+#### Executing the steps above in shell mode of the container
+
+1. Enter the container in the shell mode
+
+```sh
+docker run -it -v /YOUR/DATA/LOCATION:/data kcho/enigma-chr-pipeline /bin/bash
+```
+
+2. Run the lines below to limit number of processes in the TBSS
+
+```sh
+conda activate /opt/fsl-6.0.6
+cd /opt/ENIGMA_CHR_DTI/
+git checkout main
+git pull
+xvfb-run -a /opt/miniconda-latest/bin/python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_subjects.py -b /data
+
+# once completed run the second process
+xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_study.py -b /data
+```
+
+
 #### Example of slum job submission code
 
 ```
@@ -46,3 +68,5 @@ module load singularity/3.2.1
 
 singularity run -e -B ${data_location}:/data:rw enigma-chr-pipeline.simg xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_study.py -b /data -l /data/log.txt
 ```
+
+
