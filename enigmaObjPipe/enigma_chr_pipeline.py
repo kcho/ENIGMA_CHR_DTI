@@ -4,6 +4,7 @@ import re
 import pandas as pd
 from pathlib import Path
 from multiprocessing import Pool
+from typing import Union
 
 from enigmaObjPipe.utils.paths import read_objPipe_config
 from enigmaObjPipe.utils.dicom import DicomTools, DicomToolsStudy
@@ -31,7 +32,7 @@ class ProcessingFailure(Exception):
     pass
 
 
-class PathReg(object):
+class PathRegSubject(object):
     def init_from_dicom_dir(self, dicom_dir):
         self.dicom_dir = Path(dicom_dir)
         self.subject_name = dicom_dir.name
@@ -86,7 +87,7 @@ class PathReg(object):
 
 
 class EnigmaChrSubjectDicomDir(
-        PathReg, DicomTools, RunCommand, DwiPipe, NoiseRemovalPipe,
+        PathRegSubject, DicomTools, RunCommand, DwiPipe, NoiseRemovalPipe,
         MaskingPipe, EddyPipe, Snapshot):
 
     def __init__(self, dicom_dir):
@@ -230,9 +231,12 @@ class EnigmaChrSubjectNiftiDir(EnigmaChrSubjectDicomDir):
         EnigmaChrSubjectDicomDir.__init__(self, dicom_dir_missing)
 
 
-def run_subject_pipeline_parallel(subject: EnigmaChrSubjectDicomDir,
+def run_subject_pipeline_parallel(subject: Union[EnigmaChrSubjectDicomDir,
+                                                 EnigmaChrSubjectNiftiDir],
+                                  nproc: int = 1,
                                   force: bool = False,
                                   test: bool = False):
+    """Run subject_pipeline_part2 method for a given subject class"""
     try:
         subject.subject_pipeline_part2(nproc=1, force=force, test=test)
     except:
