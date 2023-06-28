@@ -238,7 +238,7 @@ def run_subject_pipeline_parallel(subject: Union[EnigmaChrSubjectDicomDir,
                                   test: bool = False):
     """Run subject_pipeline_part2 method for a given subject class"""
     try:
-        subject.subject_pipeline_part2(nproc=1, force=force, test=test)
+        subject.subject_pipeline_part2(nproc=nproc, force=force, test=test)
     except:
         pass
 
