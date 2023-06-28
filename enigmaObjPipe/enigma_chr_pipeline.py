@@ -249,11 +249,28 @@ def mycallback(x):
     return x
 
 
-class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
-        DicomToolsStudy, DwiToolsStudy):
+class PathRegStudy(object):
+    def init_from_root_dir(self, root_dir: str):
+        self.root_dir = Path(root_dir)
+        self.source_dir = self.root_dir / 'sourcedata'
+        self.sourcedata_root_check = self.source_dir.is_dir()
+        self.rawdata_root = self.root_dir / 'rawdata'
+        self.rawdata_root_check = self.rawdata_root.is_dir()
+
+        # tbss
+        self.derivatives_root = self.root_dir / 'derivatives'
+        self.tbss_all_out_dir = self.derivatives_root / 'tbss'
+        self.tbss_stats_dir = self.tbss_all_out_dir / 'stats'
+        self.tbss_screen_shot_dir = self.tbss_all_out_dir / 'snapshots'
+        self.web_summary_dir = self.derivatives_root / 'web_summary'
+        self.web_summary_file = self.web_summary_dir / \
+                f'{self.site}.html'
+
+
+class EnigmaChrStudy(PathRegStudy, StudyTBSS, RunCommand,
+                     Snapshot, DicomToolsStudy, DwiToolsStudy):
     def __init__(self, root_dir: Path, site: str = None,
-                 raw_data_type: str = 'dicom',
-                 config_loc: str = None):
+                 raw_data_type: str = 'dicom', config_loc: str = None):
         '''ENIGMA CHR Project directory object
 
         Key argument:
@@ -285,12 +302,11 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         else:
             self.site = 'Study'
 
-        self.root_dir = Path(root_dir)
-        self.source_dir = self.root_dir / 'sourcedata'
-        self.sourcedata_root_check = self.source_dir.is_dir()
-        self.rawdata_root = self.root_dir / 'rawdata'
-        self.rawdata_root_check = self.rawdata_root.is_dir()
+        self.init_from_root_dir(root_dir)
+        self.init_study_subjects(raw_data_type)
+        self.update_study_subjects(config_loc)
 
+    def init_study_subjects(self, raw_data_type: str):
         if raw_data_type == 'dicom':
             self.subjects = list(sorted([x for x in self.source_dir.glob('*')
                 if not x.name.startswith('.')]))
@@ -327,15 +343,7 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
             self.subject_classes = [EnigmaChrSubjectNiftiDir(x) for x
                                     in self.subjects]
 
-        # tbss
-        self.derivatives_root = self.root_dir / 'derivatives'
-        self.tbss_all_out_dir = self.derivatives_root / 'tbss'
-        self.tbss_stats_dir = self.tbss_all_out_dir / 'stats'
-        self.tbss_screen_shot_dir = self.tbss_all_out_dir / 'snapshots'
-        self.web_summary_dir = self.derivatives_root / 'web_summary'
-        self.web_summary_file = self.web_summary_dir / \
-                f'{self.site}.html'
-
+    def update_study_subjects(self, config_loc: str = None):
         # set settings from config
         if config_loc is None:
             config_loc = '/opt/ENIGMA_CHR_DTI/enigmaObjPipe/config.ini'
@@ -351,21 +359,16 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
 
         self.tbss_all = subject.tbss_all
 
-    def project_pipeline(self,
-                         force: bool = False,
-                         test: bool = False,
-                         nproc: int = 4):
-        print('''Study wise pipeline''')
-
-        # Run subject level preprocessing
+    def collect_errors_from_checkrun(self):
+        """Run subject pipeline and collect errors"""
         error_df = pd.DataFrame(columns=['subject', 'error'])
         for subject in self.subject_classes:
             error_df_tmp = pd.DataFrame(
                     {'subject': [subject.subject_name]})
             try:
-                subject.subject_pipeline(force=force,
+                subject.subject_pipeline(force=self.force,
                                          check_run=True,
-                                         test=test)
+                                         test=self.test)
             except NoDicomException:
                 error_df_tmp['error'] = 'No dicom files'
                 error_df_tmp['data_loc'] = subject.dicom_dir
@@ -443,17 +446,20 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
                   'the code.')
             raise PartialDataCases
 
-        # Actual processing
-        processing_failed_subject_classes = []
+    def project_pipeline_part1(self):
+        # Serial processing for unring and cnn masking
         for subject in self.subject_classes:
-            subject.subject_pipeline_part1(force=force, test=test)
+            subject.subject_pipeline_part1(force=self.force,
+                                           test=self.test,
+                                           nproc=self.nproc)
 
-        pool = Pool(nproc)
+    def project_pipeline_part2(self):
+        # parallel processing for eddy
+        pool = Pool(self.nproc)
         results = []
-        processing_failed_subject_classes = []
         for subject in self.subject_classes:
             r = pool.apply_async(run_subject_pipeline_parallel,
-                                 (subject, force, test,),
+                                 (subject, 1, self.force, self.test,),
                                  callback=mycallback)
             results.append(r)
 
@@ -464,6 +470,8 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
         pool.join()
 
         self.subject_classes = [x.get() for x in results]
+
+    def pipeline_check(self):
         processing_failed_subject_classes = [x for x in self.subject_classes
                                              if not x.check_complete()]
 
@@ -487,25 +495,45 @@ class EnigmaChrStudy(StudyTBSS, RunCommand, Snapshot,
             error_df.to_csv(error_file_to_write)
             raise ProcessingFailure
 
+    def tbss_pipline(self):
         # Run tbss
         self.tbss_all_modalities = ['dti_FA', 'dti_RD', 'dti_MD', 'dti_L1']
         self.tbss_all_modalities_str = ['FA', 'RD', 'MD', 'AD']
         self.create_tbss_all_csv(self.tbss_all_out_dir)
         if len([x for x in self.subject_classes
                 if x.preproc_completed]) > 1:
-            self.execute_tbss(force, nproc=nproc)
+            self.execute_tbss(self.force, nproc=self.nproc)
         else:
             print('***')
             print('Not enough preprocessed subjects to run TBSS')
             print('***')
 
+    def pipeline_progress(self):
         # Study progress
         self.build_study_progress()
         self.dicom_header_summary()
         self.nifti_header_summary()
         self.head_motion_summary()
         self.tbss_summary()
-        self.tbss_qc(force)
+        self.tbss_qc(self.force)
 
         create_project_summary(self, self.web_summary_file)
+
+    def project_pipeline(self,
+                         force: bool = False,
+                         test: bool = False,
+                         nproc: int = 4):
+        """Study wise pipeline"""
+        self.force = force
+        self.test = test
+        self.nproc = nproc
+
+        # collect error for each subject
+        self.collect_errors_from_checkrun()
+
+        self.project_pipeline_part1()
+        self.project_pipeline_part2()
+        self.pipeline_check()
+        self.tbss_pipline()
+        self.pipeline_progress()
 
