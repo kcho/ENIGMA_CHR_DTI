@@ -6,10 +6,12 @@ Run subject preprocessing steps
 
 ```
 # docker
-docker run -it -v ${data_location}:/data enigma-chr-pipeline xvfb-run -a /opt/miniconda-latest/bin/python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_subjects.py -b /data
+docker run -it -v ${data_location}:/data enigma-chr-pipeline \
+    xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_subjects.py -b /data
 
 # singularity
-singularity exec -B ${data_location}:/data enigma-chr-pipeline.simg xvfb-run -a /opt/miniconda-latest/bin/python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_subjects.py -b /data
+singularity exec -B ${data_location}:/data enigma-chr-pipeline.simg \
+    xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_subjects.py -b /data
 ```
 
 #### Step 2.
@@ -18,11 +20,12 @@ Run TBSS step
 
 ```
 # docker
-docker run -it -v ${data_location}:/data enigma-chr-pipeline xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_study.py -b /data
+docker run -it -v ${data_location}:/data enigma-chr-pipeline \
+    xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_study.py -b /data
 
 # singularity
-singularity exec -B ${data_location}:/data enigma-chr-pipeline.simg xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_study.py -b /data
-
+singularity exec -B ${data_location}:/data enigma-chr-pipeline.simg \
+    xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_study.py -b /data
 ```
 
 
@@ -41,7 +44,7 @@ conda activate /opt/fsl-6.0.6
 cd /opt/ENIGMA_CHR_DTI/
 git checkout main
 git pull
-xvfb-run -a /opt/miniconda-latest/bin/python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_subjects.py -b /data
+xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_subjects.py -b /data
 
 # once completed run the second process
 xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_study.py -b /data
@@ -66,7 +69,8 @@ export SINGULARITY_LOCALCACHEDIR="/temp_work/$(whoami)/temp_build" \
        SINGULARITY_TMPDIR="/temp_work/$(whoami)/temp_build"
 module load singularity/3.2.1
 
-singularity run -e -B ${data_location}:/data:rw enigma-chr-pipeline.simg xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_study.py -b /data -l /data/log.txt
+singularity run -e -B ${data_location}:/data:rw enigma-chr-pipeline.simg \
+    xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/preproc_enigma_chr_study.py -b /data -l /data/log.txt
 ```
 
 
