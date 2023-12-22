@@ -127,6 +127,11 @@ python /opt/ENIGMA_CHR_DTI/scripts/collect_outputs.py
 ```
 
 
+## `ln: failed to create symbolic link './ENIGMA_DTI_FA.nii.gz': Operation not supported` 
+
+WIP
+
+
 ## Basic debugging
 
 1. Check the list of docker images
