@@ -41,7 +41,7 @@ RUN apt-get update
 
 RUN wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslconda/releases/fslinstaller.py
 RUN apt-get update && apt-get install python -y
-RUN python fslinstaller.py -d /opt/fsl-6.0.6
+RUN python fslinstaller.py -d /opt/fsl-6.0.6 -V 6.0.6
 
 # Installing ANTS
 RUN echo "Installing ANTS ..." \
