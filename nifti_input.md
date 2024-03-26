@@ -32,7 +32,7 @@ $ docker run -it \
     kcho/enigma-chr-pipeline xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data --nifti_input
 
 # for singularity
-$ singularity shell -e -B ${enigma_chr_dir}:/data \
+$ singularity run -e -B ${enigma_chr_dir}:/data \
     enigma-chr-pipeline.simg xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data --nifti_input
 ```
 
