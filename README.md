@@ -1,6 +1,6 @@
 # ENIGMA CHR DTI pipeline
 
-[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.2662497.svg)](https://doi.org/10.5281/zenodo.2662497)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10888323.svg)](https://doi.org/10.5281/zenodo.10888323)
 
 * Kevin Cho, kevincho@bwh.harvard.edu
 * Yoobin Kwak, yoobinkwak@gmail.com
