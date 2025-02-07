@@ -125,6 +125,10 @@
     {{ study.head_motion_df_html }}
     <br><br><br>
 
+    <h2>Head motion z-score</h2>
+    {{ study.head_motion_df_zscore_html }}
+    <br><br><br>
+
     {% if study.tree_out %}
     <h2>Data Structure</h2>
     {% for directory_title, tree_s in study.tree_out.items() %}
@@ -138,6 +142,10 @@
 
     <h2>TBSS output</h2>
     {{ study.tbss_df_html }}
+    <br><br><br>
+
+    <h2>TBSS standard deviation</h2>
+    {{ study.tbss_df_html_zscore }}
     <br><br><br>
 
     <h2>TBSS QC</h2>
