@@ -11,6 +11,8 @@ import os
 from eddy_squeeze.eddy_squeeze_lib.eddy_files import EddyRun, EddyDirectories
 from eddy_squeeze.eddy_squeeze_lib.eddy_web import create_html
 from nifti_snapshot import nifti_snapshot
+from enigmaObjPipe.utils.web_summary import (
+        add_zscore_cols, replace_zscore_cols, highlight_zscore)
 
 Num = Union[int, float]
 Paths = Union[Path, str]
@@ -274,8 +276,20 @@ class DwiPipe(object):
 
 class DwiToolsStudy(object):
     def head_motion_summary(self):
-        self.head_motion_df_html = pd.concat(
-                [x.eddyRun.df_motion for x in self.subject_classes]).to_html(
+        print('Head motion summary')
+        self.head_motion_df = pd.concat([
+            x.eddyRun.df_motion for x in self.subject_classes
+            ]).reset_index(drop=True)
+        self.head_motion_df_zscore = replace_zscore_cols(self.head_motion_df)
+        styled_df = self.head_motion_df_zscore.style.applymap(
+                highlight_zscore, 
+                subset=[col for col in self.head_motion_df_zscore.columns
+                        if col.endswith("_zscore")]
+                )
+        self.head_motion_df_html = self.head_motion_df.to_html(
+                classes=["table-bordered", "table-striped", "table-hover"]
+            )
+        self.head_motion_df_zscore_html = styled_df.to_html(
                 classes=["table-bordered", "table-striped", "table-hover"]
             )
 
