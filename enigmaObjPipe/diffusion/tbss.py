@@ -5,6 +5,9 @@ import pandas as pd
 import nibabel as nb
 from pathlib import Path
 import argparse
+from enigmaObjPipe.utils.web_summary import (
+        replace_zscore_cols, highlight_zscore)
+
 
 class StudyTBSS(object):
     def get_tbss_diff_modalities(self):
@@ -177,6 +180,7 @@ class StudyTBSS(object):
 
     def tbss_summary(self):
         self.tbss_df = pd.DataFrame()
+        self.tbss_df_zscore = pd.DataFrame()
         for modality in self.tbss_all_modalities_str:
             df_tmp = pd.read_csv(
                     self.tbss_stats_dir / f'{modality}_combined_roi.csv')
@@ -186,9 +190,24 @@ class StudyTBSS(object):
             df_tmp['Modality'] = modality
             df_tmp = df_tmp[['Modality', 'Cases', 'Average'] + [x for x in
                 df_tmp.columns if x not in ['Modality', 'Cases', 'Average']]]
+
+            df_tmp_zscore = replace_zscore_cols(df_tmp)
+
             self.tbss_df = pd.concat([self.tbss_df, df_tmp])
+            self.tbss_df_zscore = pd.concat([self.tbss_df_zscore,
+                                             df_tmp_zscore])
 
         self.tbss_df_html = self.tbss_df.to_html(
+                classes=["table-bordered", "table-striped", "table-hover"]
+            )
+
+        # Apply conditional styling
+        styled_df = self.tbss_df_zscore.reset_index(drop=True).style.applymap(
+                highlight_zscore, 
+                subset=[col for col in self.tbss_df_zscore.columns
+                        if col.endswith("_zscore")]
+        )
+        self.tbss_df_html_zscore = styled_df.to_html(
                 classes=["table-bordered", "table-striped", "table-hover"]
             )
 
