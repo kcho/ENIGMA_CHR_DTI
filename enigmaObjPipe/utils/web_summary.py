@@ -1,8 +1,6 @@
 import os
 import re
 from jinja2 import Environment, FileSystemLoader
-import pandas as pd
-from scipy.stats import zscore
 from pathlib import Path
 import pdfkit
 from eddy_squeeze.eddy_squeeze_lib.eddy_web import \
@@ -31,30 +29,6 @@ def basename(path):
 def sorter(file_path):
     '''functions used in the jinja2 template'''
     return int(file_path.name[:3])
-
-
-def highlight_zscore(val):
-    """Highlight Z-scores greater than 3 and less than -3 in red."""
-    if isinstance(val, (int, float)) and val > 3:
-        return "background-color: red; color: white; font-weight: bold;"
-    elif isinstance(val, (int, float)) and val < -3:
-        return "background-color: red; color: white; font-weight: bold;"
-    return ""
-
-def add_zscore_cols(df: pd.DataFrame) -> pd.DataFrame:
-    numeric_cols = df.select_dtypes(include=["number"]).columns
-    z_score_df = df[numeric_cols].apply(zscore)
-    z_score_df.columns = [f"{col}_zscore" for col in numeric_cols]
-    
-    return pd.concat([df, z_score_df], axis=1)
-
-
-def replace_zscore_cols(df: pd.DataFrame) -> pd.DataFrame:
-    numeric_cols = df.select_dtypes(include=["number"]).columns
-    z_score_df = df[numeric_cols].apply(zscore)
-    z_score_df.columns = [f"{col}_zscore" for col in numeric_cols]
-    
-    return pd.concat([df.drop(numeric_cols, axis=1), z_score_df], axis=1)
 
 
 def create_subject_summary(Subject: object, out_html: Path, **kwargs):

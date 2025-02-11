@@ -204,8 +204,5 @@ RUN pwd
 RUN pwd
 RUN pwd
 RUN pwd
-RUN echo 'export FSLOUTPUTTYPE=NIFTI_GZ' >> ~/.bashrc
-RUN source ~/.bashrc
-
 RUN cd /opt/ENIGMA_CHR_DTI && git pull && git checkout initial_deploy
 CMD cd /opt/ENIGMA_CHR_DTI && git pull && git checkout initial_deploy; xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data
