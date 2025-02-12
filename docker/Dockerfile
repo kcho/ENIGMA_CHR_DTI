@@ -71,7 +71,7 @@ RUN source activate enigma-env && pip install \
     git+https://github.com/pnlbwh/conversion.git
 
 # Clone repositories
-RUN git clone https://github.com/kcho/TBSS /opt/tbss && \
+RUN git clone https://github.com/pnlbwh/TBSS /opt/tbss && \
     git clone https://github.com/pnlbwh/CNN-Diffusion-MRIBrain-Segmentation /opt/CNN-Diffusion-MRIBrain-Segmentation && \
     git clone https://github.com/kcho/ENIGMA_CHR_DTI /opt/ENIGMA_CHR_DTI
 
@@ -103,10 +103,16 @@ RUN apt-get update -qq && apt-get install -y -q --no-install-recommends \
 RUN source activate enigma-env && \
     mamba install -c conda-forge dipy
 RUN source activate enigma-env && \
-    pip install nibabel==4.0.2  pydicom==2.3.1 # Downgrade 
+    pip install nibabel==4.0.2 pydicom==2.3.1 # Downgrade 
+RUN source activate enigma-env && \
+    pip install psutil==6.1.1
 
 RUN cd /opt/CNN-Diffusion-MRIBrain-Segmentation && \
     git reset --hard 3236d89
+
+RUN cd /opt/tbss && \
+    git checkout increase-precision && \
+    git reset --hard e4a4287
 
 # Install additional data for CNN-Diffusion-MRIBrain-Segmentation
 RUN mamba create --yes --quiet -n dmri_seg python=3.11
