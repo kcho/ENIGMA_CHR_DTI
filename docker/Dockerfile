@@ -127,8 +127,8 @@ WORKDIR /data
 RUN echo 'export FSLOUTPUTTYPE=NIFTI_GZ' >> ~/.bashrc
 
 # Update ENIGMA_CHR repository
-RUN cd /opt/ENIGMA_CHR_DTI && git pull && git checkout new_fsl_new_docker
+RUN cd /opt/ENIGMA_CHR_DTI && git pull && git checkout dmriflow_init
 
 # Set default command
-CMD cd /opt/ENIGMA_CHR_DTI && git pull && git checkout new_fsl_new_docker; \
+CMD cd /opt/ENIGMA_CHR_DTI && git pull && git checkout dmriflow_init; \
     source activate enigma-env && xvfb-run -a python /opt/ENIGMA_CHR_DTI/scripts/enigma_chr_pipeline.py -b /data
