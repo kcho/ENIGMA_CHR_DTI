@@ -134,10 +134,11 @@ class DwiPipe(object):
             with open(temp.name, 'w') as f:
                 f.write(str(input_file.absolute()))
 
-            command = f'{self.cnn_dms}/pipeline/dwi_masking.py \
-                -i {temp.name} \
-                -f {self.cnn_dms}/model_folder \
-                -nproc {nproc}'
+            command = f'mamba run -n dmri_seg python ' \
+                    f'{self.cnn_dms}/pipeline/dwi_masking.py ' \
+                f'-i {temp.name} ' \
+                f'-f {self.cnn_dms}/model_folder ' \
+                f'-nproc {nproc}'
 
             self.run(command)
             out_mask = input_file.parent / (input_file.name.split('.')[0] + 
